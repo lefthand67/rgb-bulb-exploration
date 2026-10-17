@@ -4,18 +4,62 @@
 @import '@fontsource/nunito/700.css';
 
 :root {
+  color-scheme: light dark;
+
+  /* Semantic tokens — dark (default) */
   --bg-color: #0b0e17;
+  --bg-vignette: radial-gradient(circle at 50% 30%, #1a2238 0%, #0b0e17 75%);
   --panel-bg: #151b2b;
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --surface: rgba(255, 255, 255, 0.08);
+  --surface-hover: rgba(255, 255, 255, 0.18);
+  --track-bg: rgba(255, 255, 255, 0.05);
+  --track-border: rgba(255, 255, 255, 0.3);
   --text-main: #f5f7ff;
   --text-muted: #a0aec0;
-  
+  --accent: #ffe8a3;
+  --accent-text: #1a202c;
+  --bulb-outline: #ffffff;
+  --bulb-body: #718096;
+
   --red: #ff3b3b;
   --green: #28d17c;
   --blue: #3b7bff;
-  
-  --accent: #ffe8a3;
+
   --font-heading: 'Comfortaa', cursive, sans-serif;
   --font-body: 'Nunito', sans-serif;
+
+  /* expose our palette to reveal.js (we ship no reveal theme CSS) */
+  --r-background-color: var(--bg-color);
+  --r-main-color: var(--text-main);
+  --r-heading-color: var(--text-main);
+  --r-heading-text-transform: none;
+  --r-link-color: var(--blue);
+  --r-link-color-hover: var(--green);
+  --r-main-font: var(--font-body);
+  --r-heading-font: var(--font-heading);
+  --r-main-font-size: 30px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #f4f6fb;
+    --bg-vignette: radial-gradient(circle at 50% 30%, #ffffff 0%, #eef1f8 75%);
+    --panel-bg: #ffffff;
+    --panel-border: rgba(15, 23, 42, 0.12);
+    --panel-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    --surface: rgba(15, 23, 42, 0.05);
+    --surface-hover: rgba(15, 23, 42, 0.12);
+    --track-bg: rgba(15, 23, 42, 0.06);
+    --track-border: rgba(15, 23, 42, 0.30);
+    --text-main: #101828;
+    --text-muted: #475467;
+    --accent: #b7791f;
+    --accent-text: #ffffff;
+    --bulb-outline: #344054;
+    --bulb-body: #98a2b3;
+  }
 }
 
 .reveal {
@@ -73,6 +117,6 @@
   content: '';
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
-  background: radial-gradient(circle at 50% 30%, #1a2238 0%, #0b0e17 75%);
+  background: var(--bg-vignette);
   z-index: -1;
 }

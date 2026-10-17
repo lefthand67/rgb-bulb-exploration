@@ -6,7 +6,8 @@ import {
   luminance,
   TOTAL_COLORS,
   shouldUseHash,
-  dragValue
+  dragValue,
+  bulbBrightness
 } from '../../app/src/js/util.js';
 
 describe('util.js', () => {
@@ -44,6 +45,29 @@ describe('util.js', () => {
     it('keeps hash URLs over http(s)', () => {
       expect(shouldUseHash('http:')).toBe(true);
       expect(shouldUseHash('https:')).toBe(true);
+    });
+  });
+
+  describe('bulbBrightness', () => {
+    it('is 0 when the bulb is off', () => {
+      expect(bulbBrightness(0, 0, 0)).toBe(0);
+    });
+
+    it('is 1 for a fully lit channel, in any of the primaries', () => {
+      expect(bulbBrightness(255, 0, 0)).toBe(1);
+      expect(bulbBrightness(0, 0, 255)).toBe(1);
+      expect(bulbBrightness(0, 255, 0)).toBe(1);
+      expect(bulbBrightness(255, 255, 255)).toBe(1);
+    });
+
+    it('is monotonic in every channel', () => {
+      expect(bulbBrightness(10, 0, 0)).toBeLessThanOrEqual(bulbBrightness(20, 0, 0));
+      expect(bulbBrightness(0, 10, 0)).toBeLessThanOrEqual(bulbBrightness(0, 20, 0));
+      expect(bulbBrightness(0, 0, 10)).toBeLessThanOrEqual(bulbBrightness(0, 0, 20));
+    });
+
+    it('never goes below 0', () => {
+      expect(bulbBrightness(0, 0, 1)).toBeGreaterThan(0);
     });
   });
 

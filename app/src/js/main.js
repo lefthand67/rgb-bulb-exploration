@@ -1,6 +1,5 @@
 import Reveal from 'reveal.js';
 import 'reveal.js/reveal.css';
-import 'reveal.js/theme/black.css';
 import '../css/theme.css';
 import '../css/components.css';
 
@@ -157,17 +156,11 @@ function initSlide(slide) {
     createStrip1D({ mountEl: stripEl });
   }
 
-  // Slide 5: Grid
+  // Slide 5: Grid (R × G field) — the preview lives on this slide (local),
+  // it never writes to another slide's store.
   const gridEl = slide.querySelector('#grid-slide5');
   if (gridEl) {
-    createGrid2D({ 
-      mountEl: gridEl, 
-      onSelect: (r, g, b) => {
-        if (playgroundStore) {
-          playgroundStore.setRGB(r, g, b);
-        }
-      }
-    });
+    createGrid2D({ mountEl: gridEl });
   }
 
   // Slide 6: Cube & Counter

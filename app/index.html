@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
   <title>RGB Чашки: почему в лампочке 16 миллионов цветов?</title>
   
 </head>
@@ -60,6 +61,7 @@
               <span class="switch-value" data-switch-value>0</span>
               <span class="switch-caption" data-switch-caption data-text-on="ярче всего!" data-text-off="свет выключен">свет выключен</span>
             </div>
+            <p class="bulb-caption">0 — совсем не светит.</p>
 
             <button type="button" class="light-switch" data-light-switch
                     role="switch" aria-checked="false"
@@ -100,6 +102,7 @@
           </div>
           <div class="stage-group-wrap">
             <div id="bulb-playground"></div>
+            <p class="bulb-caption">Чем больше света в чашках, тем ярче светит лампочка.</p>
             <div class="chips-group" style="margin-top: 15px;">
               <button class="preset-chip" data-preset="255,220,0">☀️ Солнце</button>
               <button class="preset-chip" data-preset="0,120,255">🌊 Океан</button>
@@ -119,7 +122,7 @@
         <h2>📏 Одна чашка: 256 шагов</h2>
         <p>Давай посмотрим на одну чашку — красный свет.</p>
         <div id="strip-slide4"></div>
-        <p class="fragment">Одна чашка даёт <strong>256</strong> разных оттенков красного — от полной темноты до ослепительного сияния.</p>
+        <p class="fragment">Одна чашка даёт <strong>256</strong> разных оттенков красного — от полной темноты до самого яркого красного.</p>
         <aside class="notes">
           Подчеркните, что шагов именно 256, так как 0 — это первый шаг (выключено).
         </aside>
@@ -128,11 +131,13 @@
       <!-- Slide 5: Two cups (65,536) -->
       <section>
         <h2>🖼️ Две чашки: 256 × 256 = 65 536</h2>
-        <p>Берём две чашки — красный и зелёный свет.</p>
+        <p>Красный и зелёный можно смешать по-разному. Сколько разных цветов получится?</p>
         <div id="grid-slide5"></div>
-        <p class="fragment">Получается целое поле из <strong>65 536</strong> цветов! Но это ещё не 16 миллионов…</p>
+        <p class="fragment">Одна полоска — это <strong>один</strong> красный и все <strong>256</strong> зелёных. Полосок тоже 256 — по одной на каждый красный.</p>
+        <p class="fragment">Значит: <strong>256 × 256 = 65 536</strong>. Но это ещё не 16 миллионов…</p>
         <aside class="notes">
-          65 536 — это уже огромное число, но мы добавляем третью чашку!
+          Обведите пальцем одну строку поля: в ней 256 зелёных оттенков. Строк — тоже 256. Умножение отвечает на вопрос «сколько всего клеток».
+          Предыдущий слайд: одна чашка — 256. Следующий: добавляем синий — получается куб.
         </aside>
       </section>
 

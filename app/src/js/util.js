@@ -9,6 +9,13 @@ export const toRgbString = (r, g, b) =>
 export const luminance = (r, g, b) =>
   0.2126 * clamp(r, 0, 255) + 0.7152 * clamp(g, 0, 255) + 0.0722 * clamp(b, 0, 255);
 
+// Perceptual output of an RGB light: the brightest channel drives how much
+// light the bulb emits. 0 = off, 1 = at least one channel at max. Mild gamma
+// (^0.8) so mid-range colors do not look too dim. `luminance()` is the tool
+// for text contrast, not for emission (its green weight would fade red/blue).
+export const bulbBrightness = (r, g, b) =>
+  Math.pow(Math.max(clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255)) / 255, 0.8);
+
 export const TOTAL_COLORS = 256 ** 3; // 16_777_216
 
 // reveal.js `hash: true` calls history.replaceState(location.pathname) on the
