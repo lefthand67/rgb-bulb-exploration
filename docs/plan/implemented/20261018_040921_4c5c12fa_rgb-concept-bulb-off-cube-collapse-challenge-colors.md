@@ -2,7 +2,7 @@
 
 - **ID / filename:** `20261018_040921_4c5c12fa_rgb-concept-bulb-off-cube-collapse-challenge-colors.md`
 - **Date:** 2026-10-18
-- **Status:** Proposed
+- **Status:** Implemented
 - **Depends on / cross-references:**
   - `docs/plan/implemented/20261018_030423_573e1977_deck-polish-system-theme-bulb-brightness-slides.md` — system light/dark theme, `bulbBrightness()`, and the current bulb SVG split (body vs emissive). This plan fixes visual states that plan left unfinished.
   - `docs/plan/implemented/20261018_030657_08d53c07_cube-myths-challenge-grownups.md` — current isometric cube, vertical myth stack, and challenge layout.
@@ -22,8 +22,9 @@ The deck currently looks wrong in the **light system theme**, and two interactio
 2. **Slide 4 «0 и 255: выключатель света»** and **slide 5 «Цветовая лаборатория» → 🌙 Ночь** show a bulb that stays white when it is off. The emissive glass is faded to `opacity: 0`, but there is no unlit glass underneath; the transparent bulb reveals the white slide panel.
 3. **Slide 8 «Три чашки: от квадрата к кубу»** keeps drawing the other blue sheets at reduced opacity even when the blue slider is at `0`. The cube never collapses to the single R×G square, so the main visual proof of «256 × 256» is missing.
 4. **Slide 12 «Найди такой цвет»** has only five hard-coded targets. The children like the game and want more colours.
+5. **Slide 12 also overflows the slide.** The generic cup labels make the challenge row too wide, so the side panel wraps below the cups; a failed guess adds a hint and pushes the target and buttons completely out of the clipped slide. The child sees only the cups and cannot retry comfortably.
 
-The fix is one shared **dark light-mixing stage** for both lightmix slides, an **unlit dark glass** layer inside the bulb, a **blue-sheet layer model** that grows/collapses with the blue value, and a **larger, testable target list** for the challenge. All logic that can be pure is extracted and tested first (TDD); the visual results are checked with a small headless contract script plus screenshots in both themes.
+The fix is one shared **dark light-mixing stage** for both lightmix slides, an **unlit dark glass** layer inside the bulb, a **blue-sheet layer model** that grows/collapses with the blue value, a **larger, testable target list** for the challenge, and a **compact one-row challenge layout** with explicit in-place retry and a reserved hint area. All logic that can be pure is extracted and tested first (TDD); the visual results are checked with a small headless contract script plus screenshots in both themes.
 
 ---
 
@@ -39,6 +40,7 @@ The reviewer uses the **on-screen slide counter**, while `app/index.html` sectio
 | #4 | 8 | 7 | «🧊 Три чашки: от квадрата к кубу» / `createCubeIllustration` | blue sheets do not disappear; cube never becomes a square |
 | #5 | 10 (myth 2) | 8 / nested `8/1` | «Свет смешивается как краска?» / `createLightMix` | same washed-out circles as slide 3 |
 | #6 | 12 | 9 | «🎯 Найди такой цвет» / `createChallenge` | only 5 targets; children want more colours |
+| #7 | 12 | 9 | «🎯 Найди такой цвет» / `createChallenge` | after a wrong guess the target preview and buttons fall below the fold; only the three cups remain visible and the content is clipped |
 
 ### 2.1 Measured / observed root causes
 
@@ -104,6 +106,17 @@ const TARGETS = [
 ```
 
 The game works, but after five solves it loops. There is nothing to try for children who liked the slide.
+
+**E. The challenge row wraps and the slide clips it (item #7).**
+
+This was found while finishing the implementation. At 1280×720 the challenge box was already **814 px tall** before any interaction, while the slide section is 720 px. The cause is the generic cup layout inside the challenge:
+
+- `.challenge-cups` is a `cups-group` with the full-size cups. Each cup label («Красный», «Зелёный», «Синий») has a wide min-content width, so the three cups need **472 px** instead of the intended ~250 px.
+- `.challenge-row` uses `flex-wrap: wrap`; with the cups and the side panel too wide, the side panel (target preview, hint, buttons, progress) wraps onto a second row at `y ≈ 690` — below the visible slide.
+- A wrong guess makes it worse: the hint text grows the box to a measured **scrollHeight of 1061 px**. `.reveal .slides section { overflow: hidden }` clips the overflow, so the child sees only the cups and cannot see the target or the buttons.
+- The failed-guess branch itself does **not** navigate to another target; the missing task is a layout failure, not a state change. Still, the required UX must be explicit: a wrong guess stays on the same target, shows a retry hint, and leaves «Пропустить ➔» available.
+
+The fix is a compact, single-row challenge layout with a reserved hint area. The measured result after the fix is **632 px** before a guess and **663 px** after a two-line retry hint, with the task, target, Check and Skip all inside the 720 px viewport.
 
 ---
 
@@ -369,6 +382,44 @@ Rules:
 - Set `mountEl.dataset.targetCount = String(TARGETS.length)` and `mountEl.dataset.solvedCount = String(solvedNames.size)` so the visual contract can assert the game data without hard-coding 16 in the script.
 - The target swatch and current swatch keep their existing layout. No extra buttons are required; «Пропустить ➔» already cycles targets.
 
+### 3.5 A challenge that fits, retries in place, and still skips (item #7)
+
+The challenge must never move the target or the actions off the slide. Keep the
+game on **one row** and size the challenge copies of the cups explicitly rather
+than inheriting the playground sizes:
+
+```css
+.challenge-box { width: min(1040px, 100%); padding: 16px 22px; gap: 12px; }
+.challenge-row { flex-wrap: nowrap; width: 100%; gap: 28px; }
+.challenge-cups { flex: 0 0 auto; gap: 16px; align-items: flex-end; }
+.challenge-cups .cup-wrapper { width: 96px; }
+.challenge-cups .cup-label { font-size: 0.66em; white-space: nowrap; }
+.challenge-cups .cup-container { width: 62px; height: 172px; }
+.challenge-cups .cup-btn { width: 34px; height: 34px; }
+.challenge-side { flex: 0 1 460px; min-width: 0; gap: 10px; }
+.challenge-status { width: 100%; min-height: 2.6em; font-size: 0.78em; }
+.challenge-controls .btn-primary,
+.challenge-controls .preset-chip { font-size: 0.78em; padding: 9px 14px; white-space: nowrap; }
+```
+
+Behaviour rules:
+
+- **Wrong guess:** keep `currentIndex`, do not lock the game, do not start any
+  timer. Show «Пока не совпало. …» plus the channel hint in the reserved
+  `.challenge-status` area. The child can retry with the same cups.
+- **Skip:** always available; it advances exactly one target, including after a
+  failed guess.
+- **Correct guess:** keep the existing confetti and 2 s auto-next (the happy
+  path is unchanged), with the `locked` flag preventing a double count.
+- The status area is `aria-live="polite"`, and the hint must not change the
+  slide height enough to clip the controls.
+
+The visual contract must assert both the geometry and the retry semantics:
+before a guess, the box bottom is inside the viewport and the title, target,
+Check and Skip are visible; after a deliberately wrong guess, the title is
+unchanged, the solved count is still 0, the hint is visible, the layout still
+fits, and Skip advances exactly one target.
+
 ---
 
 ## 4. TDD implementation plan
@@ -455,6 +506,26 @@ Run it; it must fail before implementation.
 
 **Refactor:** verify the existing confetti, hint, skip, and auto-next behaviour still work; no cross-slide store writes.
 
+### Phase 4b — Challenge layout and failed-guess retry (item #7)
+
+**Red — visual contract:** extend `scripts/check-visuals.mjs` on slide `#/9`:
+
+- `section.present.scrollHeight <= 720`, the `.challenge-box` bottom is inside
+  the viewport, and `.challenge-title`, `.target-preview`, `.btn-check`,
+  `.btn-skip` all have a non-zero box fully inside the viewport.
+- Click «Проверить цвет!» with the initial wrong cups. After the hint appears,
+  the title is unchanged, `data-solved-count` is still `0`, the status contains
+  «Пока не совпало» and «Подсказка», the layout still fits, and the target,
+  Check and Skip are still visible.
+- Click «Пропустить ➔»; the title changes to exactly one next target.
+
+**Green:** replace the wrap-prone challenge styles with the compact one-row
+layout in §3.5, reserve the hint height, remove the inline status style, and
+make the failure branch explicit (same target, no timer).
+
+**Refactor:** re-run the contract in both themes and at 1280×720 and 375×667;
+verify the success/confetti path still auto-advances once after 2 s.
+
 ### Phase 5 — Integration and packaging
 
 - Add `"check:visuals": "node scripts/check-visuals.mjs"` to `package.json` (and document the required dev server + Firefox, like `check-centering.mjs`).
@@ -476,6 +547,7 @@ Run it; it must fail before implementation.
 | **C3** | Extend visual contract for `sheetCount` at blue 0/255 | `scripts/check-visuals.mjs` | C2 | Contract fails on the old ghost cube, passes after |
 | **K1** | Expand `TARGETS` to 16, extract `isColorMatch`/`hintFor` + tests | `app/src/js/challenges.js`, `tests/unit/challenges.test.js` | — | All target tests green; game still playable |
 | **K2** | Update progress copy to «из 16», keep skip/solve flow | `app/src/js/challenges.js` | K1 | No more “0 из 16 777 216” |
+| **K3** | Compact one-row challenge layout + explicit in-place retry, add geometry/retry contract | `app/src/css/components.css`, `app/src/js/challenges.js`, `scripts/check-visuals.mjs` | K1/K2 | Slide fits; a wrong guess keeps the task, target, hint, Check and Skip visible; Skip advances one target |
 | **I1** | Full verification, centering, packaging, screenshots | repo | all | `npm test`, `check:visuals`, centering, `npm run package` all pass |
 
 Suggested order: **L** (shared, quick), **B** (shared bulb), **C** (cube), **K** (content), then **I**.
@@ -487,17 +559,17 @@ Suggested order: **L** (shared, quick), **B** (shared bulb), **C** (cube), **K**
 | File | Change |
 |---|---|
 | `app/src/js/lightmix.js` | Add `.lightmix-stage` wrapper; keep channel opacity subscription; add Russian `aria-label`. |
-| `app/src/css/components.css` | Dark lightmix stage, `isolation: isolate`, myth panel width/compact variant; any bulb/challenge style adjustments. |
+| `app/src/css/components.css` | Dark lightmix stage, `isolation: isolate`, myth panel width/compact variant, compact one-row challenge layout with reserved hint height. |
 | `app/src/css/theme.css` | Tokens `--light-stage-bg`, `--light-stage-border`, `--bulb-off-fill`, `--bulb-filament-off` for both themes. |
 | `app/src/js/util.js` | `bulbState(r,g,b)` (and keep `bulbBrightness`). |
 | `app/src/js/bulb.js` | Unlit glass/filament group, data state, keep emissive brightness. |
 | `app/src/js/cube.js` | `sheetLayers()`, depth-based drawing, data attributes, honest captions. |
-| `app/src/js/challenges.js` | Expanded `TARGETS`, extracted match/hint helpers, progress count. |
+| `app/src/js/challenges.js` | Expanded `TARGETS`, extracted match/hint helpers, progress count, explicit same-target retry after a wrong guess. |
 | `app/index.html` | Only if copy/labels change; the components own most markup. |
 | `tests/unit/util.test.js` | `bulbState` tests. |
 | `tests/unit/cube.test.js` | `sheetLayers` tests; keep `sliceBlues`/`isoProjection` tests. |
 | `tests/unit/challenges.test.js` | New target/helper tests. |
-| `scripts/check-visuals.mjs` | New BiDi visual contract for stages, bulb states, cube sheet count, challenge count. |
+| `scripts/check-visuals.mjs` | New BiDi visual contract for stages, bulb states, cube sheet count, challenge count, challenge geometry and failed-guess retry. |
 | `package.json` | `check:visuals` script. |
 
 No new dependencies. Do not edit `web/` or `dist/` by hand; rebuild them.
@@ -510,7 +582,7 @@ No new dependencies. Do not edit `web/` or `dist/` by hand; rebuild them.
 2. **Slide 4:** with the switch off, the bulb glass is visibly dark; the emissive layer has opacity `0`; the readout is `rgb(0, 0, 0)`. With the switch on, the bulb is bright white. Both themes.
 3. **Slide 5:** the 🌙 Ночь preset produces a dark/off bulb, not a white one. A dim non-zero colour (e.g. `10,20,50`) produces a dark blue glow, not white.
 4. **Slide 8:** at blue `0` the canvas shows exactly one sheet — the R×G square — with a caption confirming 65 536 colours. Dragging the blue slider up grows the stack; at `255` the full cube is visible. No ghost sheets remain at `0`.
-5. **Slide 12:** at least 16 distinct targets are available; the children can play through all of them; the progress line says «из 16» (or the actual target count), not «из 16 777 216»; skip/solve still work.
+5. **Slide 12:** at least 16 distinct targets are available; the children can play through all of them; the progress line says «из 16» (or the actual target count), not «из 16 777 216»; skip/solve still work. The whole game fits a 720 px slide: the task, target preview, Check and Skip are visible. A wrong guess keeps the same target, shows a retry hint without auto-advancing, and Skip still advances exactly one target.
 6. `npm test` is green, including new `bulbState`, `sheetLayers`, and challenge tests.
 7. `npm run check:visuals` passes against a running dev server and Firefox BiDi.
 8. `node scripts/check-centering.mjs` still passes on every slide/sub-slide.
@@ -527,6 +599,7 @@ No new dependencies. Do not edit `web/` or `dist/` by hand; rebuild them.
 - [ ] Slide 5: click 🌙 Ночь → the bulb is dark, not white. Set cups to a dark blue (e.g. `10,20,50`) → dark blue glow.
 - [ ] Slide 8: drag blue to `0` → one square only; drag to `128` → partial cube; drag to `255` → full cube. Read the caption aloud.
 - [ ] Slide 12: play/skip through all 16 target colours; hints appear; confetti fires; progress counter increments and cycles.
+- [ ] Slide 12: make a wrong guess → the same target, target preview, hint, Check and Skip stay visible; retry in place; Skip advances one target.
 - [ ] Keyboard: switch space/enter; cups arrows; challenge buttons reachable.
 - [ ] 1280×720 and 375×667 screenshots in both themes; no clipped content.
 - [ ] `npm test`, `npm run check:visuals`, `node scripts/check-centering.mjs`, `npm run package`.
@@ -549,6 +622,7 @@ No new dependencies. Do not edit `web/` or `dist/` by hand; rebuild them.
 | Double-click/check/skip races in the challenge | `locked` flag + `pendingTimer`; unique solved-name `Set`; clear timer on skip/load. |
 | Off bulb still has a white outline in dark theme | Switch `.bulb-body` to `--bulb-outline-off` and slightly lower opacity when `data-bulb-state="off"`. |
 | New text/markup changes slide height | The §2A `ResizeObserver` relayout re-centres; run the centering check and screenshots. |
+| Challenge cups inherit wide playground labels and wrap the side panel off-slide | Explicit compact challenge cup sizes, `flex-wrap: nowrap`, a `min-width: 0` side panel, and a reserved hint height; assert geometry in `check-visuals.mjs`. |
 | Packaged file regresses | No new dependencies; run `npm run package` + `verify:web`. |
 
 ---
@@ -587,7 +661,7 @@ A review of the proposed solutions found these additional problems. They are now
 > 1. **Light mixing (slides 3 and myth 2):** `mix-blend-mode: screen` is blending with the light slide background, washing pure RGB into pastels. Wrap the circles in `.lightmix-stage` with a permanently dark background (`--light-stage-bg`), `isolation: isolate`, border/radius; keep pure `#ff0000/#00ff00/#0000ff` and channel opacity. Widen `.myth-panel--lightmix` to ~270 px (a transform scale does not change layout width) or build a real compact variant.
 > 2. **Bulb off (slides 4 and 5):** the emissive group fades to `0`, but the glass has no unlit fill, so the white panel shows through. Add an always-visible `.bulb-unlit` glass fill (`--bulb-off-fill`, dark in both themes) and a dark unlit filament beneath `.bulb-emissive`. Keep the outline/socket on top. In the dark theme, switch the off outline to `--bulb-outline-off` so the white outline does not make the bulb look lit. Add `bulbState(r,g,b)` returning `off|dim|on` + unit tests; set `data-bulb-state` on the SVG. No minimum opacity.
 > 3. **Cube collapse (slide 8):** replace the “draw all five sheets except the selected one” loop with `sheetLayers(currentBlue, maxSheets = 6)`. The current blue is the front sheet (`depth 0`); older blue levels are behind at `depth = (currentBlue - blue) / 255`. At `0` return exactly one layer; at `255` return 6 illustrative layers. Draw back-to-front; set `canvas.dataset.sheetCount`/`data-blue`; update the caption; hide/mute the blue axis label at `0`. Replace the unbounded per-blue bitmap cache with a bounded LRU (24–32 entries) or quantise the illustrative blue level. Add unit tests for `sheetLayers`.
-> 4. **Challenge (slide 12):** expand `TARGETS` to at least 15–16 distinct colours (proposed list in §3.4), extract `isColorMatch`/`hintFor`, add unit tests (count, uniqueness, tolerance, and **tolerance boxes disjoint: > 2 × 24 = 48 on at least one channel**). Add a `locked` flag + `pendingTimer`, track unique solved names in a `Set`, and prevent double-check/skip races. Use safe emoji (`❄️`, `🔮`, `🌅`). Update the progress pill to «из 16», keep skip/confetti/auto-next.
+> 4. **Challenge (slide 12):** expand `TARGETS` to at least 15–16 distinct colours (proposed list in §3.4), extract `isColorMatch`/`hintFor`, add unit tests (count, uniqueness, tolerance, and **tolerance boxes disjoint: > 2 × 24 = 48 on at least one channel**). Add a `locked` flag + `pendingTimer`, track unique solved names in a `Set`, and prevent double-check/skip races. Use safe emoji (`❄️`, `🔮`, `🌅`). Update the progress pill to «из 16», keep skip/confetti/auto-next. Make the challenge a compact one-row layout (§3.5) that fits the slide. A wrong guess must stay on the same target with a visible retry hint and working Skip; never auto-advance on failure. Assert the geometry and retry behaviour in the visual contract.
 > 5. **Verification:** add `scripts/check-visuals.mjs` (BiDi, like `check-centering.mjs`) asserting the dark lightmix stage, pure circle colours, bulb `off`/`on`/`dim`, cube `sheetCount` at blue 0/255, and challenge target count. Wait for CSS/slide transitions before reading computed styles. Run `npm test`, `npm run check:visuals`, `node scripts/check-centering.mjs`, `npm run package`, and light/dark screenshots at 1280×720 and 375×667.
 >
 > Do not add runtime dependencies. Keep all child-facing strings Russian. Do not hand-edit `web/` or `dist/`.

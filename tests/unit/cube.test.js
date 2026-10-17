@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sliceBlues, isoProjection } from '../../app/src/js/cube.js';
+import { sliceBlues, isoProjection, sheetLayers } from '../../app/src/js/cube.js';
 
 describe('cube helpers', () => {
   describe('sliceBlues', () => {
@@ -18,6 +18,52 @@ describe('cube helpers', () => {
       for (let i = 1; i < blues.length; i++) {
         expect(blues[i]).toBeGreaterThan(blues[i - 1]);
       }
+    });
+  });
+
+  describe('sheetLayers', () => {
+    it('collapses to exactly one sheet when blue is zero', () => {
+      expect(sheetLayers(0)).toEqual([{ blue: 0, depth: 0 }]);
+    });
+
+    it('returns the full illustrative stack at blue 255', () => {
+      const layers = sheetLayers(255, 6);
+      expect(layers).toHaveLength(6);
+      expect(layers[0]).toEqual({ blue: 0, depth: 1 });
+      expect(layers.at(-1)).toEqual({ blue: 255, depth: 0 });
+    });
+
+    it('grows a partial stack at blue 128', () => {
+      const layers = sheetLayers(128, 6);
+      expect(layers.length).toBeGreaterThan(1);
+      expect(layers.length).toBeLessThanOrEqual(6);
+      expect(layers.every((l) => l.blue <= 128)).toBe(true);
+      expect(layers.at(-1).blue).toBe(128);
+      expect(layers.at(-1).depth).toBe(0);
+      for (let i = 1; i < layers.length; i++) {
+        expect(layers[i].depth).toBeLessThan(layers[i - 1].depth);
+      }
+    });
+
+    it('returns a tiny but real stack at blue 1', () => {
+      expect(sheetLayers(1, 6).map((l) => l.blue)).toEqual([0, 1]);
+    });
+
+    it('keeps every layer blue an integer in 0..255 and depth in 0..1', () => {
+      for (const current of [0, 1, 64, 128, 200, 255]) {
+        for (const layer of sheetLayers(current, 6)) {
+          expect(Number.isInteger(layer.blue)).toBe(true);
+          expect(layer.blue).toBeGreaterThanOrEqual(0);
+          expect(layer.blue).toBeLessThanOrEqual(255);
+          expect(layer.depth).toBeGreaterThanOrEqual(0);
+          expect(layer.depth).toBeLessThanOrEqual(1);
+        }
+      }
+    });
+
+    it('never repeats a blue level', () => {
+      const blues = sheetLayers(128, 6).map((l) => l.blue);
+      expect(new Set(blues).size).toBe(blues.length);
     });
   });
 

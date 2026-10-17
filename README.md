@@ -79,6 +79,17 @@ npm run preview   # serve dist/ locally to check
 npm test
 ```
 
+**Step 7 — (optional) visual regression checks**
+
+The browser checks need the dev server plus a headless Firefox with the
+WebDriver BiDi port open:
+```bash
+npm run dev
+firefox --headless --remote-debugging-port 9222 about:blank
+npm run check:visuals                                  # dark light-mix stage, bulb states, cube collapse, challenge data
+node scripts/check-centering.mjs http://localhost:3000 # every slide/sub-slide is vertically centred
+```
+
 **Project structure**
 ```
 app/     ← source of the presentation. Edit here (and only here).

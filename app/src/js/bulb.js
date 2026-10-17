@@ -1,4 +1,4 @@
-import { toHex, toRgbString, bulbBrightness } from './util.js';
+import { toHex, toRgbString, bulbBrightness, bulbState } from './util.js';
 
 export function createBulb({ mountEl, store }) {
   mountEl.innerHTML = `
@@ -35,6 +35,17 @@ export function createBulb({ mountEl, store }) {
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
       </defs>
+
+      <!-- Always-visible unlit glass: an off bulb must read dark, never white. -->
+      <g class="bulb-unlit">
+        <path class="bulb-glass"
+              d="M70 160 C50 140 40 115 40 90 A60 60 0 1 1 160 90 C160 115 150 140 130 160 L125 180 C123 185 120 190 115 190 H85 C80 190 77 185 75 180 Z"
+              fill="var(--bulb-off-fill, #1f232b)" />
+        <path class="bulb-filament-off"
+              d="M90 120 L95 90 L100 80 L105 90 L110 120"
+              stroke="var(--bulb-filament-off, #5b6472)"
+              stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
 
       <g class="bulb-emissive">
         <circle cx="100" cy="100" r="85" fill="url(#bulbGlow)" />
@@ -74,6 +85,7 @@ export function createBulb({ mountEl, store }) {
 
     // Only the emissive parts fade. 0 = off; any channel at 255 = full light.
     emissive.style.opacity = brightness;
+    svgRoot.dataset.bulbState = bulbState(r, g, b);
   });
 
   return {

@@ -7,7 +7,8 @@ import {
   TOTAL_COLORS,
   shouldUseHash,
   dragValue,
-  bulbBrightness
+  bulbBrightness,
+  bulbState
 } from '../../app/src/js/util.js';
 
 describe('util.js', () => {
@@ -68,6 +69,31 @@ describe('util.js', () => {
 
     it('never goes below 0', () => {
       expect(bulbBrightness(0, 0, 1)).toBeGreaterThan(0);
+    });
+  });
+
+  describe('bulbState', () => {
+    it('is off only when every channel is zero', () => {
+      expect(bulbState(0, 0, 0)).toBe('off');
+    });
+
+    it('is on for a fully lit channel in any primary', () => {
+      expect(bulbState(255, 255, 255)).toBe('on');
+      expect(bulbState(255, 0, 0)).toBe('on');
+      expect(bulbState(0, 255, 0)).toBe('on');
+      expect(bulbState(0, 0, 255)).toBe('on');
+    });
+
+    it('is dim for a dark non-zero colour', () => {
+      expect(bulbState(10, 20, 50)).toBe('dim');
+      expect(bulbState(0, 0, 1)).toBe('dim');
+    });
+
+    it('never goes from on to dim when a channel gets brighter', () => {
+      const rank = { off: 0, dim: 1, on: 2 };
+      for (let v = 0; v < 255; v += 7) {
+        expect(rank[bulbState(0, 0, v + 1)]).toBeGreaterThanOrEqual(rank[bulbState(0, 0, v)]);
+      }
     });
   });
 

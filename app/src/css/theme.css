@@ -22,6 +22,13 @@
   --accent-text: #1a202c;
   --bulb-outline: #ffffff;
   --bulb-body: #718096;
+  --bulb-off-fill: #1f232b;
+  --bulb-filament-off: #5b6472;
+  --bulb-outline-off: #6b7280;
+  /* The light lab is intentionally dark in both themes: additive screen
+     blending is only honest on black. */
+  --light-stage-bg: #04060c;
+  --light-stage-border: rgba(255, 255, 255, 0.16);
 
   --red: #ff3b3b;
   --green: #28d17c;
@@ -59,6 +66,11 @@
     --accent-text: #ffffff;
     --bulb-outline: #344054;
     --bulb-body: #98a2b3;
+    --bulb-off-fill: #3f4754;
+    --bulb-filament-off: #64748b;
+    --bulb-outline-off: #475569;
+    --light-stage-bg: #04060c;
+    --light-stage-border: rgba(255, 255, 255, 0.16);
   }
 }
 

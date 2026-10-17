@@ -1,9 +1,11 @@
 export function createLightMix({ mountEl, store }) {
   mountEl.innerHTML = `
     <div class="lightmix-container">
-      <div class="lightmix-circle red" data-lchan="r"></div>
-      <div class="lightmix-circle green" data-lchan="g"></div>
-      <div class="lightmix-circle blue" data-lchan="b"></div>
+      <div class="lightmix-stage" role="img" aria-label="Красный, зелёный и синий свет складываются в белый">
+        <div class="lightmix-circle red" data-lchan="r"></div>
+        <div class="lightmix-circle green" data-lchan="g"></div>
+        <div class="lightmix-circle blue" data-lchan="b"></div>
+      </div>
     </div>
   `;
 

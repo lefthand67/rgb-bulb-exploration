@@ -16,6 +16,13 @@ export const luminance = (r, g, b) =>
 export const bulbBrightness = (r, g, b) =>
   Math.pow(Math.max(clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255)) / 255, 0.8);
 
+// Three visually distinct bulb states: genuinely off, a dark but coloured
+// glow, and fully lit. The DOM and the tests share this single definition.
+export const bulbState = (r, g, b) => {
+  const brightness = bulbBrightness(r, g, b);
+  return brightness === 0 ? 'off' : brightness < 0.5 ? 'dim' : 'on';
+};
+
 export const TOTAL_COLORS = 256 ** 3; // 16_777_216
 
 // reveal.js `hash: true` calls history.replaceState(location.pathname) on the

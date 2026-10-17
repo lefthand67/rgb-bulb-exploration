@@ -11,7 +11,8 @@
     "build:web": "vite build --mode web",
     "verify:web": "node scripts/verify-web.mjs",
     "package": "npm run build:web && npm run verify:web",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:visuals": "node scripts/check-visuals.mjs"
   },
   "dependencies": {
     "@fontsource/comfortaa": "^5.3.0",

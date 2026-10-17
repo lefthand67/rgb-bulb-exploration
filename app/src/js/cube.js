@@ -10,6 +10,26 @@ export function sliceBlues(count = 5) {
 }
 
 /**
+ * Blue levels visible for the current blue value. The current sheet is the
+ * front layer (depth 0); older levels are stacked behind it. `depth` is
+ * normalised 0..1 for the isometric offset. At blue 0 exactly one sheet
+ * remains, so the cube visibly collapses to the previous slide's R×G square.
+ */
+export function sheetLayers(currentBlue, maxSheets = 6) {
+  const blue = clamp(currentBlue, 0, 255);
+  if (blue === 0) return [{ blue: 0, depth: 0 }];
+
+  const steps = Math.max(
+    2,
+    Math.min(maxSheets, Math.round((blue / 255) * (maxSheets - 1)) + 1)
+  );
+  return Array.from({ length: steps }, (_, i) => {
+    const b = Math.round((i * blue) / (steps - 1));
+    return { blue: b, depth: (blue - b) / 255 };
+  });
+}
+
+/**
  * Isometric projection for the unit cube `0..1` on each axis (light lab):
  * red → right and slightly down, green → down, blue (sheets) → up-right.
  */
@@ -66,10 +86,21 @@ export function createCubeIllustration({ mountEl } = {}) {
   const valueEl = mountEl.querySelector('[data-cube-blue-value]');
   const caption = mountEl.querySelector('[data-cube-caption]');
 
+  // Small LRU: dragging the slider across all 256 values must not retain
+  // hundreds of 256×256 canvases (each ~256 KB).
   const cache = new Map();
+  const CACHE_LIMIT = 24;
   const bitmapFor = (blue) => {
-    if (!cache.has(blue)) cache.set(blue, sheetBitmap(blue));
-    return cache.get(blue);
+    if (cache.has(blue)) {
+      const hit = cache.get(blue);
+      cache.delete(blue);
+      cache.set(blue, hit);
+      return hit;
+    }
+    const bitmap = sheetBitmap(blue);
+    cache.set(blue, bitmap);
+    if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value);
+    return bitmap;
   };
 
   const draw = () => {
@@ -123,20 +154,22 @@ export function createCubeIllustration({ mountEl } = {}) {
       ctx.stroke();
     };
 
-    // back-to-front
-    const sheets = sliceBlues(5);
-    sheets.forEach((b) => {
-      if (b === blue) return;
-      paintSheet(quad(b / 255), b, b === 0 ? 0.9 : 0.35);
+    // Back-to-front: oldest blue level first, the current front sheet last.
+    const layers = sheetLayers(blue, 6);
+    layers.forEach((layer, i) => {
+      const isCurrent = i === layers.length - 1;
+      const q = quad(layer.depth);
+      paintSheet(q, layer.blue, isCurrent ? 1 : 0.55);
+      if (isCurrent) {
+        trace(q);
+        ctx.strokeStyle = '#ffe8a3';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
     });
 
-    // highlighted sheet on top
-    const hq = quad(blue / 255);
-    paintSheet(hq, blue, 1);
-    trace(hq);
-    ctx.strokeStyle = '#ffe8a3';
-    ctx.lineWidth = 3;
-    ctx.stroke();
+    canvas.dataset.sheetCount = String(layers.length);
+    canvas.dataset.blue = String(blue);
 
     // axes labels, drawn into the canvas so they never collide with the slider
     const ax0 = 34;
@@ -149,9 +182,19 @@ export function createCubeIllustration({ mountEl } = {}) {
     ctx.rotate(-Math.PI / 2);
     ctx.fillText('Зелёный ↑', 0, 0);
     ctx.restore();
-    ctx.fillStyle = '#3b7bff';
-    ctx.fillText('Синий ↗', ax0 + sheetW + depthX + 6, H - 24 + depthY - tilt - sheetH - 6);
-    if (caption) caption.textContent = `Синий ${blue}: такой лист = 65 536 цветов`;
+    if (blue > 0) {
+      ctx.fillStyle = '#3b7bff';
+      ctx.fillText('Синий ↗', ax0 + sheetW + depthX + 6, H - 24 + depthY - tilt - sheetH - 6);
+    }
+    if (caption) {
+      if (blue === 0) {
+        caption.textContent = 'Синий 0: один лист — квадрат 65 536 цветов';
+      } else if (blue === 255) {
+        caption.textContent = 'Синий 255: весь куб — 16 777 216 цветов';
+      } else {
+        caption.textContent = `Синий ${blue}: листов ${blue + 1} (на рисунке показаны некоторые)`;
+      }
+    }
   };
 
   slider.addEventListener('input', draw);

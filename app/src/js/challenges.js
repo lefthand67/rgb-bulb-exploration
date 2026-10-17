@@ -1,17 +1,15 @@
 import confetti from 'canvas-confetti';
-import { toHex, toRgbString, clamp } from './util.js';
-
-const TARGETS = [
-  { name: '☀️ Солнце', r: 255, g: 220, b: 0 },
-  { name: '🌊 Океан', r: 0, g: 120, b: 255 },
-  { name: '🌱 Трава', r: 40, g: 200, b: 60 },
-  { name: '🍬 Жвачка', r: 255, g: 105, b: 180 },
-  { name: '🌙 Полночь', r: 10, g: 20, b: 50 }
-];
+import { toRgbString, TOTAL_COLORS } from './util.js';
+import { TARGETS, isColorMatch, hintFor } from './challenge-data.js';
 
 export function createChallenge({ mountEl, store }) {
   let currentIndex = 0;
-  let solvedCount = 0;
+  const solvedNames = new Set();
+  let locked = false;
+  let pendingTimer = null;
+
+  mountEl.dataset.targetCount = String(TARGETS.length);
+  mountEl.dataset.solvedCount = '0';
 
   mountEl.innerHTML = `
     <div class="challenge-box">
@@ -32,12 +30,13 @@ export function createChallenge({ mountEl, store }) {
               <div class="swatch-current"></div>
             </div>
           </div>
-          <div class="challenge-status" style="font-weight:700; color: var(--accent); min-height: 1.5em;"></div>
+          <div class="challenge-status" aria-live="polite"></div>
           <div class="challenge-controls">
             <button class="btn-primary btn-check">Проверить цвет!</button>
             <button class="preset-chip btn-skip">Пропустить ➔</button>
           </div>
-          <div class="cup-value-pill">Решено цветов: <span class="solved-badge">0</span> из 16 777 216</div>
+          <div class="cup-value-pill">Найдено: <span class="solved-badge">0</span> из <span class="target-total">${TARGETS.length}</span></div>
+          <div class="challenge-total">Всего в RGB: ${TOTAL_COLORS.toLocaleString('ru-RU')}</div>
         </div>
       </div>
     </div>
@@ -51,8 +50,22 @@ export function createChallenge({ mountEl, store }) {
   const btnSkip = mountEl.querySelector('.btn-skip');
   const solvedBadge = mountEl.querySelector('.solved-badge');
 
+  const cancelPending = () => {
+    if (pendingTimer !== null) {
+      clearTimeout(pendingTimer);
+      pendingTimer = null;
+    }
+  };
+
+  const renderSolved = () => {
+    solvedBadge.textContent = String(solvedNames.size);
+    mountEl.dataset.solvedCount = String(solvedNames.size);
+  };
+
   function loadTarget(index) {
-    currentIndex = index % TARGETS.length;
+    cancelPending();
+    locked = false;
+    currentIndex = ((index % TARGETS.length) + TARGETS.length) % TARGETS.length;
     const t = TARGETS[currentIndex];
     titleEl.textContent = `Цель: повтори цвет «${t.name}»`;
     swatchTarget.style.backgroundColor = toRgbString(t.r, t.g, t.b);
@@ -67,19 +80,21 @@ export function createChallenge({ mountEl, store }) {
   });
 
   btnCheck.addEventListener('click', () => {
+    if (locked) return;
     const current = store.get();
     const target = TARGETS[currentIndex];
-    const tolerance = 24;
 
-    const diffR = Math.abs(current.r - target.r);
-    const diffG = Math.abs(current.g - target.g);
-    const diffB = Math.abs(current.b - target.b);
+    if (isColorMatch(current, target)) {
+      // Lock before showing confetti/timer: a double click cannot count twice.
+      locked = true;
+      solvedNames.add(target.name);
+      renderSolved();
 
-    if (diffR <= tolerance && diffG <= tolerance && diffB <= tolerance) {
-      solvedCount++;
-      solvedBadge.textContent = solvedCount;
-      statusEl.textContent = '🎉 Ура! Точно в цель!';
-      
+      const allFound = solvedNames.size === TARGETS.length;
+      statusEl.textContent = allFound
+        ? `🎉 Все ${TARGETS.length} цветов найдены!`
+        : '🎉 Ура! Точно в цель!';
+
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!prefersReduced) {
         confetti({
@@ -89,31 +104,27 @@ export function createChallenge({ mountEl, store }) {
         });
       }
 
-      setTimeout(() => {
-        loadTarget(currentIndex + 1);
-      }, 2000);
+      if (!allFound) {
+        pendingTimer = setTimeout(() => {
+          pendingTimer = null;
+          loadTarget(currentIndex + 1);
+        }, 2000);
+      }
     } else {
-      // Give hint
-      let hints = [];
-      if (current.r < target.r - tolerance) hints.push('Добавь красного');
-      else if (current.r > target.r + tolerance) hints.push('Убавь красный');
-
-      if (current.g < target.g - tolerance) hints.push('Добавь зелёного');
-      else if (current.g > target.g + tolerance) hints.push('Убавь зелёный');
-
-      if (current.b < target.b - tolerance) hints.push('Добавь синего');
-      else if (current.b > target.b + tolerance) hints.push('Убавь синий');
-
-      statusEl.textContent = hints.length ? `🔍 Близко! Подсказка: ${hints[0]}` : '🔍 Почти! Покрути ещё чуть-чуть.';
+      // A wrong guess stays on the same target: the child can keep
+      // adjusting the cups or choose «Пропустить». Never auto-advance here.
+      statusEl.textContent = `Пока не совпало. ${hintFor(current, target)}`;
     }
   });
 
   btnSkip.addEventListener('click', () => {
+    // A skip during the 2 s auto-next delay advances exactly one target.
     loadTarget(currentIndex + 1);
   });
 
   return {
     destroy() {
+      cancelPending();
       unsubscribe();
     }
   };
