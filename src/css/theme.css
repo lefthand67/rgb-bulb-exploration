@@ -1,0 +1,61 @@
+@import '@fontsource/comfortaa/400.css';
+@import '@fontsource/comfortaa/700.css';
+@import '@fontsource/nunito/400.css';
+@import '@fontsource/nunito/700.css';
+
+:root {
+  --bg-color: #0b0e17;
+  --panel-bg: #151b2b;
+  --text-main: #f5f7ff;
+  --text-muted: #a0aec0;
+  
+  --red: #ff3b3b;
+  --green: #28d17c;
+  --blue: #3b7bff;
+  
+  --accent: #ffe8a3;
+  --font-heading: 'Comfortaa', cursive, sans-serif;
+  --font-body: 'Nunito', sans-serif;
+}
+
+.reveal {
+  font-family: var(--font-body);
+  color: var(--text-main);
+  background-color: var(--bg-color);
+}
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: var(--font-heading);
+  color: var(--text-main);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.reveal h2 {
+  font-size: 2.2em;
+  margin-bottom: 0.4em;
+}
+
+.reveal p, .reveal li {
+  font-size: 1.25em;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.reveal strong {
+  color: var(--text-main);
+}
+
+.reveal .slides section {
+  background: var(--bg-color);
+  padding: 20px;
+}
+
+/* Background radial vignette */
+.reveal::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: radial-gradient(circle at 50% 30%, #1a2238 0%, #0b0e17 75%);
+  z-index: -1;
+}

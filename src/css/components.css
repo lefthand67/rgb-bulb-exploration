@@ -1,0 +1,403 @@
+/* Cups, Bulb, Playground & Components */
+
+.lab-container {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.cups-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Cup Widget */
+.cup-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+  touch-action: none;
+}
+
+.cup-label {
+  font-family: var(--font-heading);
+  font-size: 1.1em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cup-container {
+  position: relative;
+  width: 70px;
+  height: 220px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px 8px 24px 24px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.cup-container:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.cup-liquid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  transition: height 0.05s ease-out;
+  box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Channel liquid colors */
+.cup-wrapper[data-channel="r"] .cup-liquid { background: var(--red); }
+.cup-wrapper[data-channel="g"] .cup-liquid { background: var(--green); }
+.cup-wrapper[data-channel="b"] .cup-liquid { background: var(--blue); }
+
+.cup-wrapper[data-channel="r"] .cup-label { color: var(--red); }
+.cup-wrapper[data-channel="g"] .cup-label { color: var(--green); }
+.cup-wrapper[data-channel="b"] .cup-label { color: var(--blue); }
+
+.cup-handle {
+  position: absolute;
+  left: 0; right: 0;
+  height: 8px;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  cursor: ns-resize;
+  transform: translateY(50%);
+}
+
+.cup-ticks {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.15) 0px,
+    rgba(255, 255, 255, 0.15) 1px,
+    transparent 1px,
+    transparent 13.75px
+  );
+  pointer-events: none;
+}
+
+.cup-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.cup-btn {
+  background: var(--panel-bg);
+  color: var(--text-main);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  width: 44px; height: 44px;
+  border-radius: 8px;
+  font-size: 1.2em;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cup-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent);
+}
+
+.cup-btn:active {
+  transform: scale(0.95);
+}
+
+.cup-value-pill {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Visually hidden range input for a11y */
+.sr-only-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* Bulb Stage & Readout */
+.stage-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: var(--panel-bg);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.bulb-container {
+  width: 140px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.readout-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+}
+
+.readout-rgb {
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+.readout-hex {
+  font-size: 1em;
+  color: var(--text-muted);
+}
+
+/* Presets & Chips */
+.chips-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  max-width: 400px;
+}
+
+.preset-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preset-chip:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* Additive Light Mixer */
+.lightmix-container {
+  position: relative;
+  width: 260px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.lightmix-circle {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transition: opacity 0.1s;
+}
+
+.lightmix-circle.red {
+  background: #ff0000;
+  top: 10px;
+  left: 65px;
+}
+
+.lightmix-circle.green {
+  background: #00ff00;
+  bottom: 10px;
+  left: 10px;
+}
+
+.lightmix-circle.blue {
+  background: #0000ff;
+  bottom: 10px;
+  right: 10px;
+}
+
+/* Grid & Strips */
+.strip-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.pixel-strip {
+  width: 100%;
+  max-width: 600px;
+  height: 48px;
+  image-rendering: pixelated;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+}
+
+.grid2d-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.pixel-grid {
+  width: 256px;
+  height: 256px;
+  image-rendering: pixelated;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+/* Cube illustration */
+.cube-illustration {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 20px auto;
+  transform-style: preserve-3d;
+  transform: rotateX(-20deg) rotateY(-35deg);
+}
+
+.cube-slice {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(59, 123, 271, 0.15);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Myth buster cards */
+.myths-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.myth-card {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.myth-card h3 {
+  color: var(--accent);
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+/* Challenge game */
+.challenge-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: var(--panel-bg);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.target-preview {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.swatch-target, .swatch-current {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.challenge-controls {
+  display: flex;
+  gap: 15px;
+}
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+}
+
+/* Focus capture hint banner */
+.focus-hint-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 232, 163, 0.95);
+  color: #1a202c;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.95em;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: none;
+  animation: pulse-hint 1.5s infinite;
+}
+
+.focus-hint-banner.active {
+  display: block;
+}
+
+@keyframes pulse-hint {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.03); }
+}
+
+@media (max-width: 900px) {
+  .lab-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
