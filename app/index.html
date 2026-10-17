@@ -103,7 +103,7 @@
           <div class="stage-group-wrap">
             <div id="bulb-playground"></div>
             <p class="bulb-caption">Чем больше света в чашках, тем ярче светит лампочка.</p>
-            <div class="chips-group" style="margin-top: 15px;">
+            <div class="chips-group" style="margin-top: 8px;">
               <button class="preset-chip" data-preset="255,220,0">☀️ Солнце</button>
               <button class="preset-chip" data-preset="0,120,255">🌊 Океан</button>
               <button class="preset-chip" data-preset="40,200,60">🌱 Трава</button>
@@ -131,10 +131,10 @@
       <!-- Slide 5: Two cups (65,536) -->
       <section>
         <h2>🖼️ Две чашки: 256 × 256 = 65 536</h2>
-        <p>Красный и зелёный можно смешать по-разному. Сколько разных цветов получится?</p>
+        <p>Сколько цветов получится из двух чашек — красной и зелёной?</p>
         <div id="grid-slide5"></div>
-        <p class="fragment">Одна полоска — это <strong>один</strong> красный и все <strong>256</strong> зелёных. Полосок тоже 256 — по одной на каждый красный.</p>
-        <p class="fragment">Значит: <strong>256 × 256 = 65 536</strong>. Но это ещё не 16 миллионов…</p>
+        <p class="fragment">Одна полоска — <strong>один</strong> красный и <strong>256</strong> зелёных; полосок тоже 256.</p>
+        <p class="fragment">Значит: <strong>256 × 256 = 65 536</strong>. Но это не 16 миллионов…</p>
         <aside class="notes">
           Обведите пальцем одну строку поля: в ней 256 зелёных оттенков. Строк — тоже 256. Умножение отвечает на вопрос «сколько всего клеток».
           Предыдущий слайд: одна чашка — 256. Следующий: добавляем синий — получается куб.
@@ -143,38 +143,64 @@
 
       <!-- Slide 6: Three cups (16,777,216) -->
       <section>
-        <h2>🧊 Три чашки: умножение взрывает число!</h2>
-        <p>Добавляем синюю чашку. Получается куб света!</p>
+        <h2>🧊 Три чашки: от квадрата к кубу</h2>
         <div id="cube-slide6"></div>
-        <div style="font-size: 1.4em; font-family: var(--font-heading); font-weight: 700; color: var(--accent); margin: 10px 0;">
+        <p class="fragment">Квадрат с прошлого слайда (65 536 цветов) — это <strong>один лист</strong>.</p>
+        <p class="fragment">У синего тоже <strong>256 шагов</strong> — значит, листов <strong>256</strong>. Получается куб!</p>
+        <div style="font-size: 1.15em; font-family: var(--font-heading); font-weight: 700; color: var(--accent); margin: 6px 0;">
           256 × 256 × 256 = <span id="counter-16m">0</span>
         </div>
-        <p class="fragment"><strong>Вот откуда берутся 16 миллионов! Это не волшебство — это умножение.</strong></p>
+        <p class="fragment"><strong>Вот отсюда 16 777 216! Это умножение.</strong></p>
         <aside class="notes">
-          Следите за анимацией счётчика до 16 777 216. Спросите ребёнка: представляешь, как быстро растет умножение?
+          Покажите: один лист — прошлый слайд. Листов 256 (по числу синевы). Посчитайте вместе: 65 536 × 256 = 16 777 216.
         </aside>
       </section>
 
-      <!-- Slide 7: Myth busters -->
+      <!-- Slide 7: Myth busters (vertical stack, one myth per screen) -->
       <section>
-        <h2>🛡️ Разрушители мифов</h2>
-        <div class="myths-grid">
-          <div class="myth-card">
-            <h3>«255, 255, 255 — это 255 миллионов?»</h3>
-            <p>Нет! Это рецепт самого яркого белого цвета: все чашки полны до краёв.</p>
+        <section>
+          <h2>🛡️ Разрушители мифов — три частых заблуждения</h2>
+          <p>Листайте вниз ↓ — по одному мифу на карточку.</p>
+          <div class="myth-illustration">
+            <span class="myth-swatch myth-swatch--r"></span>
+            <span class="myth-swatch myth-swatch--g"></span>
+            <span class="myth-swatch myth-swatch--b"></span>
+            <span class="myth-eq">=</span>
+            <span class="myth-swatch myth-swatch--white"></span>
           </div>
-          <div class="myth-card">
-            <h3>«Свет смешивается как краска?»</h3>
-            <p>Нет! Краска при смешивании темнеет. Свет при смешивании становится ярче и превращается в белый.</p>
+          <p><strong>«255, 255, 255 — это 255 миллионов?»</strong> Нет. Это рецепт самого яркого белого: все чашки полны.</p>
+          <p class="fragment">Число цветов — не 255 255 255, а <strong>256 × 256 × 256</strong>.</p>
+          <aside class="notes">Первый миф: три полные чашки дают белый свет. Числа не складываются — умножаются.</aside>
+        </section>
+        <section>
+          <div class="myth-illustration">
+            <div class="myth-panel" data-lightmix-myth></div>
+            <div class="myth-panel">
+              <div class="myth-paint">
+                <span class="myth-blob myth-blob--r"></span>
+                <span class="myth-blob myth-blob--g"></span>
+                <span class="myth-blob myth-blob--b"></span>
+              </div>
+              <p class="myth-paint-label">краска</p>
+            </div>
           </div>
-          <div class="myth-card">
-            <h3>«От 0 до 255 — это 255 шагов?»</h3>
-            <p>А вот и нет! Шагов ровно 256, потому что ноль (0) — тоже шаг (когда свет выключен).</p>
+          <p><strong>«Свет смешивается как краска?»</strong> Нет. Свет складывается и светлеет до белого.</p>
+          <p class="fragment">Краска вычитает цвет и темнеет.</p>
+          <aside class="notes">Слева — смешение света (ярче, до белого), справа — краска (темнеет).</aside>
+        </section>
+        <section>
+          <div class="myth-illustration" data-steps-myth>
+            <div class="steps-scale myth-steps">
+              <div class="steps-scale__track" aria-hidden="true"></div>
+              <div class="steps-scale__marker" data-steps-marker style="left: 0%;"></div>
+              <div class="steps-scale__end steps-scale__end--low" aria-hidden="true">0</div>
+              <div class="steps-scale__end steps-scale__end--high" aria-hidden="true">255</div>
+            </div>
           </div>
-        </div>
-        <aside class="notes">
-          Разберите с ребенком каждый миф. Это самые частые вопросы!
-        </aside>
+          <p><strong>«От 0 до 255 — это 255 шагов?»</strong> Нет, шагов <strong>256</strong>: ноль — тоже шаг.</p>
+          <p class="fragment">Он значит «свет выключен».</p>
+          <aside class="notes">Третий миф: посчитайте — 0, 1, …, 255. Ноль уже первый шаг.</aside>
+        </section>
       </section>
 
       <!-- Slide 8: Challenge game -->
@@ -207,10 +233,10 @@
       <section data-visibility="uncounted">
         <h2>👨‍👩‍👦 Для взрослых (родителям)</h2>
         <div style="text-align: left; max-width: 850px; margin: 0 auto; font-size: 0.9em;">
-          <p>• <strong>24-bit color:</strong> 8 bits per channel (2⁸ = 256). Three channels (RGB) = 24 bits = 16,777,216 colors.</p>
-          <p>• <strong>Hex format:</strong> `#RRGGBB`, where each pair is hexadecimal `00` to `FF` (0–255).</p>
-          <p>• <strong>Additive color model:</strong> Combining red, green, and blue light creates white (unlike subtractive CMYK paint).</p>
-          <p>• <strong>Offline capability:</strong> This deck runs entirely static from local files (`dist/`) with bundled fonts and Reveal.js.</p>
+          <p>• <strong>24-битный цвет:</strong> по <strong>8 бит</strong> на канал (<code>2⁸ = 256</code>). Три канала (RGB) — 24 бита — <strong>16 777 216</strong> цветов.</p>
+          <p>• <strong>Hex-формат:</strong> <code>#RRGGBB</code>, каждая пара — число от <code>00</code> до <code>FF</code> (0–255).</p>
+          <p>• <strong>Аддитивная модель:</strong> красный + зелёный + синий = белый свет (в отличие от субтрактивной модели красок CMYK, где смешение темнеет).</p>
+          <p>• <strong>Автономность:</strong> презентация работает офлайн; при сборке (<code>npm run package</code>) получается <strong>один файл</strong> со встроенными шрифтами.</p>
         </div>
         <aside class="notes">
           Справочная информация для взрослых.

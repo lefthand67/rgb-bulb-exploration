@@ -1,14 +1,11 @@
 #!/usr/bin/env node
-// Verify vertical centering (plan 20261018_025806 §2A.7) via WebDriver BiDi.
-// Checks every slide: inline `top` must equal (720 − scrollHeight)/2 ±1 px.
+// Verify vertical centering (plan 20261018_025806 §2A.7): every slide's inline
+// `top` must equal (720 − scrollHeight)/2 ±1 px, measured without resizing.
+// Page list is discovered dynamically, including nested (vertical) pages.
 // Usage: node scripts/check-centering.mjs <page-url> [--shot out.png]
-// The deck does not expose Reveal, and synthesized keys do not navigate it, so
-// each slide is measured by loading it directly through its `#/N` URL hash
-// (requires the page to be served over http, e.g. `python3 -m http.server`).
 
 const url = process.argv[2];
 const shotArg = process.argv.indexOf('--shot');
-const waitMs = 1200;
 
 const ws = new WebSocket('ws://127.0.0.1:9222/session');
 let id = 0;
@@ -19,6 +16,7 @@ const send = (method, params = {}) =>
     pending.set(mid, { resolve, reject });
     ws.send(JSON.stringify({ id: mid, method, params }));
   });
+pending.delete = ((orig) => (key) => { orig.call(pending, key); })(pending.delete.bind(pending));
 
 ws.onmessage = (ev) => {
   const msg = JSON.parse(ev.data);
@@ -29,16 +27,16 @@ ws.onmessage = (ev) => {
   }
 };
 
-// Watchdog: abort cleanly. Never let `timeout` SIGKILL this process with an
-// open socket — headless Firefox crashes when the BiDi connection dies mid-call.
 setTimeout(() => {
-  console.error('TIMEOUT: BiDi did not finish in 90s');
+  console.error('TIMEOUT: BiDi did not finish in 150s');
   try { ws.close(); } catch {}
   process.exit(3);
-}, 90000);
+}, 150000);
 
-const measureExpr = `(() => {
-  const s = document.querySelector('.present');
+ const measureExpr = `(() => {
+  // vertical stacks: measure the inner (sub-)slide, not the container
+  const s = document.querySelector('section.present section.present')
+    || document.querySelector('section.present');
   if (!s) return 'NO PRESENT';
   const top = parseFloat(s.style.top) || 0;
   const exp = Math.max((720 - s.scrollHeight) / 2, 0);
@@ -57,28 +55,38 @@ try {
   await send('browsingContext.navigate', { context: ctx, url, wait: 'complete' });
   await new Promise((r) => setTimeout(r, 3000));
 
-  // Discover how many slides the deck has.
-  const countRes = await send('script.evaluate', {
+  // Build the page list: every horizontal index 'N' plus every nested index
+  // 'N/V' of any section that has children.
+  const structRes = await send('script.evaluate', {
     target: { context: ctx },
-    expression: "document.querySelectorAll('.reveal .slides > section').length",
+    expression: `(() => {
+      const tops = [...document.querySelectorAll('.reveal .slides > section')];
+      const pages = [];
+      tops.forEach((sec, i) => {
+        const nested = sec.querySelectorAll(':scope > section');
+        if (nested.length === 0) pages.push(String(i));
+        else for (let v = 0; v < nested.length; v++) pages.push(i + '/' + v);
+      });
+      return pages.join('|');
+    })()`,
     awaitPromise: false,
   });
-  const count = parseInt(countRes.result.value, 10);
-
   const base = url.replace(/#.*/, '');
+  const pages = structRes.result.value.split('|');
+
   const lines = [];
-  for (let i = 0; i < count; i++) {
+  for (const page of pages) {
     await send('browsingContext.navigate', {
-      context: ctx, url: `${base}#/${i}`, wait: 'complete',
+      context: ctx, url: `${base}#/${page}`, wait: 'complete',
     });
-    await new Promise((r) => setTimeout(r, waitMs));
+    await new Promise((r) => setTimeout(r, 1100));
     const { result } = await send('script.evaluate', {
       target: { context: ctx }, expression: measureExpr, awaitPromise: false,
     });
-    lines.push(i + ': ' + result.value);
+    lines.push(page + ': ' + result.value);
   }
 
-  const ok = lines.every((l) => l.trimEnd().endsWith('true'));
+  const ok = lines.length === pages.length && lines.every((l) => l.trimEnd().endsWith('true'));
   console.log(ok ? 'PASS' : 'FAIL');
   console.log(lines.join('\n'));
 

@@ -166,11 +166,18 @@ function initSlide(slide) {
   // Slide 6: Cube & Counter
   const cubeEl = slide.querySelector('#cube-slide6');
   if (cubeEl) {
-    createCubeIllustration({ mountEl: cubeEl });
+    activeComponents.push(createCubeIllustration({ mountEl: cubeEl }));
   }
   const counterEl = slide.querySelector('#counter-16m');
   if (counterEl) {
     animateCount(counterEl, 16777216);
+  }
+
+  // Slide 7 (myth 2): additive mixing demo — light goes white, not brown
+  const mythMixEl = slide.querySelector('[data-lightmix-myth]');
+  if (mythMixEl) {
+    const store = createColorStore({ r: 255, g: 255, b: 255 });
+    activeComponents.push(createLightMix({ mountEl: mythMixEl, store }));
   }
 
   // Slide 8: Challenge

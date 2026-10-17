@@ -2,7 +2,7 @@
 
 - **ID / filename:** `20261018_030657_08d53c07_cube-myths-challenge-grownups.md`
 - **Date:** 2026-10-18
-- **Status:** Draft — items 7–10 of the running feedback list
+- **Status:** Implemented (TDD)
 - **Depends on / cross-references:**
   - `docs/plan/20261018_025806_468c36d2_interactive-0-255-light-switch-slide.md` — item 2 (vertical-centering bug, §2A) **already covers item 9**; the switch slide itself supplies reusable building blocks (`steps-scale`, `createLightSwitch`) for the myths slide.
   - `docs/plan/20261018_030423_573e1977_deck-polish-system-theme-bulb-brightness-slides.md` — items 3–6 (system theme, bulb brightness, «Одна чашка» wording, «Две чашки» redesign). Item 7 builds directly on the redesigned «Две чашки» grid; item 10 must be themed like the rest.
