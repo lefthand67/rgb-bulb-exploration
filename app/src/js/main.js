@@ -14,6 +14,7 @@ import { createStrip1D, createGrid2D } from './grid2d.js';
 import { createCubeIllustration } from './cube.js';
 import { animateCount } from './counter.js';
 import { createChallenge } from './challenges.js';
+import { createLightSwitch } from './lightswitch.js';
 
 // Global references for active components to enable cleanup
 let activeComponents = [];
@@ -29,6 +30,19 @@ const focusHint = document.getElementById('focusHint');
 function setupKeyboardCapture() {
   const handleKeyDown = (e) => {
     const activeEl = document.activeElement;
+    const tag = activeEl ? activeEl.tagName : '';
+    if (activeEl && activeEl.classList.contains('light-switch')) {
+      // The switch is a native button (Enter/Space), but Reveal.js also uses
+      // Space and arrows for navigation — capture them while it is focused.
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        // Native button activation was blocked above, so activate here.
+        activeEl.click();
+      }
+      if (e.key === 'Escape') activeEl.blur();
+      return;
+    }
     if (activeEl && activeEl.classList.contains('cup-container')) {
       // We only capture Up/Down/Left/Right for the cups.
       // Reveal.js usually uses these for navigation.
@@ -100,7 +114,21 @@ function initSlide(slide) {
     activeComponents.push(createLightMix({ mountEl: mixEl, store }));
   }
 
-  // Slide 3: Playground
+  // Slide 3: On/off switch (0 ↔ 255)
+  const switchBtn = slide.querySelector('[data-light-switch]');
+  if (switchBtn) {
+    const store = createColorStore({ r: 0, g: 0, b: 0 });
+    activeComponents.push(createBulb({ mountEl: slide.querySelector('[data-bulb-switch]'), store }));
+    activeComponents.push(createLightSwitch({
+      mountEl: switchBtn,
+      store,
+      stepsEl: slide.querySelector('[data-steps-scale]'),
+      valueEl: slide.querySelector('[data-switch-value]'),
+      captionEl: slide.querySelector('[data-switch-caption]'),
+    }));
+  }
+
+  // Slide 4: Playground
   if (slide.classList.contains('playground')) {
     playgroundStore = createColorStore({ r: 127, g: 127, b: 127 });
     
@@ -192,16 +220,46 @@ Reveal.initialize({
   maxScale: 1.6,
 });
 
+// reveal.js centers a section by writing an inline `top` from its scrollHeight.
+// Any DOM mutation after that pass leaves the top stale → the slide is pushed
+// down and clipped. Re-run the layout whenever we change the DOM.
+let layoutQueued = false;
+const scheduleLayout = () => {
+  if (layoutQueued) return;
+  layoutQueued = true;
+  requestAnimationFrame(() => {
+    layoutQueued = false;
+    Reveal.layout();
+  });
+};
+// Any later height change (a bulb readout, a resizing canvas, a future
+// widget) is self-healing. Reveal.layout() only writes `top`, never `height`,
+// so the observer cannot loop.
+const sectionObserver = new ResizeObserver(scheduleLayout);
+function observePresentSlide(slide) {
+  sectionObserver.disconnect();
+  if (slide) sectionObserver.observe(slide);
+}
+
 // Wiring lifecycle
 Reveal.on('ready', event => {
   const currentSlide = event.currentSlide;
   initSlide(currentSlide);
+  scheduleLayout();
+  observePresentSlide(currentSlide);
 });
 
 Reveal.on('slidechanged', event => {
   cleanupComponents();
   initSlide(event.currentSlide);
+  scheduleLayout();
+  observePresentSlide(event.currentSlide);
 });
+
+// Fonts change text metrics (and therefore section heights) after first paint.
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => Reveal.layout());
+}
 
 // Global setups
 setupKeyboardCapture();

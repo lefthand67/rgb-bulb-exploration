@@ -431,3 +431,202 @@
     gap: 16px;
   }
 }
+
+/* On/off switch slide (0 ↔ 255) */
+.slide-switch, .switch-slide .switch-stage {
+  display: grid;
+  grid-template-columns: 260px 480px;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.switch-slide .switch-bulb {
+  width: 220px;
+}
+
+.switch-slide .switch-bulb .stage-group {
+  min-width: 0;
+  padding: 16px;
+}
+
+.switch-slide .switch-bulb .bulb-container {
+  width: 190px;
+  height: 150px;
+}
+
+.switch-slide .switch-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 380px;
+}
+
+.switch-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-heading);
+}
+
+.switch-value {
+  font-size: 1.6em;
+  font-weight: 700;
+  color: var(--text-main);
+  min-width: 3ch;
+  text-align: right;
+}
+
+.switch-caption {
+  color: var(--text-muted);
+}
+
+.light-switch {
+  position: relative;
+  width: 150px;
+  min-height: 56px;
+  border-radius: 28px;
+  border: 2px solid var(--accent);
+  background: rgb(30, 36, 52);
+  cursor: pointer;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-main);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.light-switch:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.light-switch.is-on {
+  background: #ffe8a3;
+  color: #1a202c;
+  box-shadow: 0 0 24px rgba(255, 232, 163, 0.6);
+}
+
+.light-switch__knob {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  margin-top: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #c9d0e0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.light-switch.is-on .light-switch__knob {
+  background: #1a202c;
+  transform: translateX(94px);
+}
+
+.light-switch__label {
+  position: relative;
+  padding-left: 40px;
+}
+
+.light-switch.is-on .light-switch__label {
+  padding-left: 0;
+  padding-right: 40px;
+}
+
+.steps-scale {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 34px;
+  padding: 0;
+}
+
+.steps-scale__track {
+  position: absolute;
+  left: 0; right: 0;
+  top: 8px;
+  height: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--accent) 0px,
+    var(--accent) 1px,
+    transparent 1px,
+    transparent calc(100% / 255)
+  );
+}
+
+.steps-scale__marker {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(255, 232, 163, 0.7);
+  transition: left 0.2s ease;
+}
+
+.steps-scale__end {
+  position: absolute;
+  top: 26px;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.steps-scale__end--low { left: 0; }
+.steps-scale__end--high { right: 0; }
+
+.steps-pill {
+  background: var(--panel-bg);
+  border: 1px solid var(--accent);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.95em;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.switch-slide .switch-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  margin-top: 16px;
+}
+
+.switch-slide .switch-aha {
+  text-align: center;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light-switch,
+  .light-switch__knob,
+  .steps-scale__marker,
+  .focus-hint-banner {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .switch-slide .switch-stage {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .switch-slide .switch-controls {
+    min-width: 0;
+    width: 100%;
+  }
+}

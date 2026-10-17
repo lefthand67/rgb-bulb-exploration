@@ -43,13 +43,53 @@
         <p>Красный, зелёный и синий — это <strong>свет</strong>, а не краска.</p>
         <div style="margin: 20px 0;" data-lightmix-target></div>
         <p class="fragment">Когда лучи света накладываются друг на друга, становится <strong>ярче</strong>, а не темнее!</p>
-        <p class="fragment"><strong>0</strong> — свет выключен. <strong>255</strong> — ярче всего. В каждой чашке ровно <strong>256 шагов</strong> (потому что ноль тоже считается!).</p>
         <aside class="notes">
           Покажите разницу между краской (которая смешивается в грязно-коричневый) и светом (который складывается в белый).
         </aside>
       </section>
 
-      <!-- Slide 3: Playground (Main Interactive Lab) -->
+      <!-- Slide 3: 0 and 255 — the on/off switch -->
+      <section class="switch-slide" data-state="interactive-slide">
+        <h2>🔌 0 и 255: выключатель света</h2>
+
+        <div class="switch-stage">
+          <div class="switch-bulb" data-bulb-switch></div>
+
+          <div class="switch-controls">
+            <div class="switch-readout" aria-live="polite">
+              <span class="switch-value" data-switch-value>0</span>
+              <span class="switch-caption" data-switch-caption data-text-on="ярче всего!" data-text-off="свет выключен">свет выключен</span>
+            </div>
+
+            <button type="button" class="light-switch" data-light-switch
+                    role="switch" aria-checked="false"
+                    aria-label="Выключатель света лампочки"
+                    data-label-on="Вкл" data-label-off="Выкл">
+              <span class="light-switch__knob" aria-hidden="true"></span>
+              <span class="light-switch__label" aria-hidden="true">Выкл</span>
+            </button>
+
+            <div class="steps-scale" data-steps-scale>
+              <div class="steps-scale__track" aria-hidden="true"></div>
+              <div class="steps-scale__marker" data-steps-marker></div>
+              <div class="steps-scale__end steps-scale__end--low" aria-hidden="true">0</div>
+              <div class="steps-scale__end steps-scale__end--high" aria-hidden="true">255</div>
+            </div>
+            <div class="steps-pill">256 шагов (и 0 — тоже шаг!)</div>
+          </div>
+        </div>
+
+        <p class="switch-hint">Нажми на выключатель и посмотри, что изменится.<br>Пробел — включить/выключить · Esc — к слайдам</p>
+
+        <p class="fragment switch-aha">Вот почему шагов <strong>256</strong>, а не 255: ноль — тоже шаг. Он значит «света нет».</p>
+
+        <aside class="notes">
+          Дайте ребёнку пощёлкать выключателем несколько раз. Спросите: «А сколько шагов между 0 и 255?»
+          Подсказка: посчитайте вместе — «выключено» это уже первый шаг.
+        </aside>
+      </section>
+
+      <!-- Slide 4: Playground (Main Interactive Lab) -->
       <section class="playground" data-state="interactive-slide">
         <h2>🔬 Цветовая лаборатория</h2>
         <div class="lab-container">
