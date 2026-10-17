@@ -2,7 +2,7 @@
 
 - **ID / filename:** `20261018_030423_573e1977_deck-polish-system-theme-bulb-brightness-slides.md`
 - **Date:** 2026-10-18
-- **Status:** Draft — items 3–6 of the running feedback list (item 2 lives in the sibling plan)
+- **Status:** Implemented (TDD)
 - **Depends on / cross-references:**
   - `docs/plan/20261018_025806_468c36d2_interactive-0-255-light-switch-slide.md` — the new on/off switch slide **and §2A**, the prerequisite vertical-centering fix. Item 4 and item 3 below both touch the bulb, which that plan also uses: coordinate on `app/src/js/bulb.js`.
   - `docs/plan/implemented/20261018_021427_9c087dca_rgb-cups-16-million-colors.md` — original pedagogy/copy rules.
