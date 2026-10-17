@@ -20,8 +20,11 @@
 
 .reveal {
   font-family: var(--font-body);
+  font-size: 30px;
   color: var(--text-main);
   background-color: var(--bg-color);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
@@ -29,16 +32,27 @@
   color: var(--text-main);
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-transform: none;
 }
 
-.reveal h2 {
-  font-size: 2.2em;
+.reveal h1 {
+  font-size: 1.6em;
   margin-bottom: 0.4em;
 }
 
+.reveal h2 {
+  font-size: 1.45em;
+  margin-bottom: 0.4em;
+}
+
+.reveal h3 {
+  font-size: 1.15em;
+}
+
 .reveal p, .reveal li {
-  font-size: 1.25em;
-  line-height: 1.5;
+  font-size: 1.05em;
+  line-height: 1.45;
   color: var(--text-muted);
 }
 
@@ -48,7 +62,10 @@
 
 .reveal .slides section {
   background: var(--bg-color);
-  padding: 20px;
+  padding: 16px;
+  box-sizing: border-box;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 /* Background radial vignette */

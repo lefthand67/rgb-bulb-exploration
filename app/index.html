@@ -5,11 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RGB Чашки: почему в лампочке 16 миллионов цветов?</title>
   
-  <!-- Reveal.js CSS -->
-  
-  <!-- Custom Lab Theme & Components CSS -->
-  <script type="module" crossorigin src="./assets/index-DP_YhhcI.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CoHIu9K3.css">
 </head>
 <body>
 
@@ -31,7 +26,7 @@
       <section>
         <h2>💡 Твоя умная лампочка</h2>
         <div style="display: flex; gap: 40px; align-items: center; justify-content: center; margin-top: 20px;">
-          <div data-bulb-s1 style="width: 160px;"></div>
+          <div data-bulb-s1 style="flex: 0 0 auto;"></div>
           <div style="text-align: left; max-width: 500px;">
             <p class="fragment">Эта лампочка говорит, что умеет светить <strong>16 миллионов</strong> цветов.</p>
             <p class="fragment" style="color: var(--accent);">«Если смотреть на новый цвет каждую секунду, днём и ночью без сна, понадобится примерно <strong>194 дня</strong>!»</p>
@@ -106,7 +101,7 @@
         <h2>🧊 Три чашки: умножение взрывает число!</h2>
         <p>Добавляем синюю чашку. Получается куб света!</p>
         <div id="cube-slide6"></div>
-        <div style="font-size: 1.8em; font-family: var(--font-heading); font-weight: 700; color: var(--accent); margin: 15px 0;">
+        <div style="font-size: 1.4em; font-family: var(--font-heading); font-weight: 700; color: var(--accent); margin: 10px 0;">
           256 × 256 × 256 = <span id="counter-16m">0</span>
         </div>
         <p class="fragment"><strong>Вот откуда берутся 16 миллионов! Это не волшебство — это умножение.</strong></p>
@@ -155,7 +150,7 @@
           <p class="fragment">2️⃣ Три чашки перемножаются: <strong>256 × 256 × 256</strong>.</p>
           <p class="fragment">3️⃣ Получается ровно <strong>16 777 216</strong> цветов — примерно 16,7 миллиона!</p>
         </div>
-        <div style="margin-top: 30px; font-size: 1.5em; font-family: var(--font-heading); color: var(--accent);" class="fragment">
+        <div style="margin-top: 24px; font-size: 1.25em; font-family: var(--font-heading); color: var(--accent);" class="fragment">
           Теперь ты — настоящий Смешиватель Света! 🔦🏆
         </div>
         <aside class="notes">
@@ -186,5 +181,6 @@
   </div>
 
   <!-- Main JavaScript bundle -->
+  <script type="module" src="./src/js/main.js"></script>
 </body>
 </html>

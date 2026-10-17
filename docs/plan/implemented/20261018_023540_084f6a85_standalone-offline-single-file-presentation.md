@@ -2,7 +2,7 @@
 
 - **ID / filename:** `20261018_023540_084f6a85_standalone-offline-single-file-presentation.md`
 - **Date:** 2026-10-18
-- **Status:** Ready for implementation
+- **Status:** Implemented (see §15 for post-implementation follow-up fixes)
 - **Owner:** (assign)
 - **Depends on:** `docs/plan/implemented/20261018_021427_9c087dca_rgb-cups-16-million-colors.md` (the deck itself, already implemented)
 - **Language of teacher-facing deliverable:** **Russian** (README / instructions). Code, comments, and this plan stay English.
@@ -203,17 +203,21 @@ Then remove the four `<link rel="stylesheet">` tags from `app/index.html`. In pr
 
 | ID | Task | Files | Depends | Done when |
 |----|------|-------|---------|-----------|
-| **T0** | Add `vite-plugin-singlefile` dev dependency | `package.json`, `package-lock.json` | — | `npm i -D vite-plugin-singlefile` installs; lockfile updated |
-| **T1** | **Restructure:** move source into `app/`, set Vite `root`, move CSS to JS imports | `app/**`, `vite.config.js`, `app/index.html`, `app/src/js/main.js` | T0 | `npm run dev` serves the deck from `http://localhost:3000/`; no source file remains at the repo root except tooling/docs |
-| **T2** | Add `web` mode to Vite config + scripts | `vite.config.js`, `package.json` | T1 | `npm run build:web` emits exactly one file: `web/index.html`; `npm run build` still emits `dist/` |
-| **T3** | Make reveal `hash` protocol-aware | `app/src/js/main.js` (+ optional `util.js` helper and unit test) | — | Opened from `file://`, no `SecurityError`; over http(s), hash URLs still work |
-| **T4** | Build + inspect the artifact | `web/index.html` | T2,T3 | No `<script src>`, no external `<link rel=stylesheet>`, fonts appear as `data:font/...;base64`, `<html lang="ru">` present |
-| **T5** | Automated self-containment checker + `package` script | `scripts/verify-web.mjs`, `package.json` | T4 | `npm run package` exits 0 only if `web/` is self-contained |
-| **T6** | `.gitignore` (ignore `web/`, `dist/`) + full README instructions | `.gitignore`, `README.md`, optional `docs/teacher-ru.md` | T4 | Fresh clone → `npm install && npm run package` documented verbatim; "edit only `app/`" rule documented; no build output tracked by git |
-| **T7** | (Optional) Font trimming for size | `app/src/css/theme.css` or new `app/src/css/fonts.css` | T4 | File size drops (see §9); Russian still renders correctly |
-| **T8** | (Optional) Playwright `file://` smoke test | `tests/e2e/web.spec.js`, `playwright.config.js` | T4 | Test opens the file, asserts deck works, asserts **zero** `pageerror` |
-| **T9** | (Optional) Zip packaging for classroom hand-off | `scripts/package-web.mjs`, `package.json` | T5 | `npm run package` can emit `release/RGB-16-million-colors.zip` with the HTML + RU readme |
+| **T0** | Add `vite-plugin-singlefile` dev dependency | `package.json`, `package-lock.json` | — | ✅ `npm i -D vite-plugin-singlefile` installs; lockfile updated |
+| **T1** | **Restructure:** move source into `app/`, set Vite `root`, move CSS to JS imports | `app/**`, `vite.config.js`, `app/index.html`, `app/src/js/main.js` | T0 | ✅ `npm run dev` serves the deck from `http://localhost:3000/`; no source file remains at the repo root except tooling/docs |
+| **T2** | Add `web` mode to Vite config + scripts | `vite.config.js`, `package.json` | T1 | ✅ `npm run build:web` emits exactly one file: `web/index.html`; `npm run build` still emits `dist/` |
+| **T3** | Make reveal `hash` protocol-aware | `app/src/js/main.js` (+ optional `util.js` helper and unit test) | — | ✅ Opened from `file://`, no `SecurityError`; over http(s), hash URLs still work |
+| **T4** | Build + inspect the artifact | `web/index.html` | T2,T3 | ✅ No `<script src>`, no external `<link rel=stylesheet>`, fonts appear as `data:font/...;base64`, `<html lang="ru">` present |
+| **T5** | Automated self-containment checker + `package` script | `scripts/verify-web.mjs`, `package.json` | T4 | ✅ `npm run package` exits 0 only if `web/` is self-contained |
+| **T6** | `.gitignore` (ignore `web/`, `dist/`) + full README instructions | `.gitignore`, `README.md`, optional `docs/teacher-ru.md` | T4 | ✅ Fresh clone → `npm install && npm run package` documented verbatim; "edit only `app/`" rule documented; no build output tracked by git |
+| **T7** | (Optional) Font trimming for size | `app/src/css/theme.css` or new `app/src/css/fonts.css` | T4 | Not implemented |
+| **T8** | (Optional) Playwright `file://` smoke test | `tests/e2e/web.spec.js`, `playwright.config.js` | T4 | Not implemented |
+| **T9** | (Optional) Zip packaging for classroom hand-off | `scripts/package-web.mjs`, `package.json` | T5 | Not implemented |
 | **T10** | (Future) CI/CD: build, verify, publish `web/index.html` | `.github/workflows/*`, etc. | T5 | Out of scope now; noted so the layout supports it |
+| **T11** | **Fix test suite after restructure:** Vitest inherited Vite's `root: 'app'` and found no tests; unit test imported the old `src/js/util.js` path | `vitest.config.js`, `tests/unit/util.test.js` | T1 | ✅ `npm test` runs 11 tests from the repo root and passes |
+| **T12** | Fix text overflowing the 1280×720 slide canvas and locally huge fonts | `app/src/css/theme.css`, `app/src/css/components.css`, `app/index.html` | T4 | ✅ Base font 30px, headings 1.45/1.6em, `text-transform:none`; every slide fits at 1280×800 (verified with headless Firefox screenshots) |
+| **T13** | Make cup dragging smooth (was only jumping 0↔255); extract a testable pure helper | `app/src/js/cup.js`, `app/src/js/util.js`, `tests/unit/util.test.js` | T4 | ✅ Capture-phase pointer handling + relative drag; `dragValue()` unit-tested |
+| **T14** | Fix the challenge slide: cups were destroyed by `innerHTML` and never shown; redesigned the layout | `app/src/js/challenges.js`, `app/src/js/main.js`, `app/src/css/components.css` | T4 | ✅ Three cups are mounted into `.challenge-cups` and the slide fits |
 
 ---
 
@@ -560,3 +564,77 @@ If any step is unclear, fix the README before declaring the task done.
 ---
 
 *End of plan.*
+
+---
+
+## 15. Follow-up fixes (post-implementation review)
+
+After the first successful `npm run package`, a review surfaced three user-visible
+problems and one regression. All are implemented and verified.
+
+### 15.1 Regression: the Vitest suite silently stopped running (T11)
+Setting `root: 'app'` in `vite.config.js` made Vitest resolve its test root to
+`app/`, so `npm test` reported **“No test files found”** and exited `1`. The
+single existing test also imported the pre-restructure path `../../src/js/util.js`.
+
+Fixes:
+- Added `vitest.config.js` at the repo root that pins `test.root` to the
+  repository root and `include: ['tests/**/*.test.js']`.
+- Updated the import to `../../app/src/js/util.js`.
+- TDD: wrote failing tests first, then implemented the helpers.
+
+### 15.2 Typography / overflow (T12)
+`reveal.js` ships a 42px base font (theme `--r-main-font-size`) and an uppercase
+heading transform. Combined with `h2 { font-size: 1.8em }` and `p { 1.1em }`,
+several slides exceeded the 1280×720 canvas and were clipped (“text floats past
+the screen”), and individual headings looked oversized.
+
+Fixes (`app/src/css/theme.css`):
+- base `.reveal { font-size: 30px }`;
+- `h1 1.6em`, `h2 1.45em`, `h3 1.15em`, `p/li 1.05em`;
+- `text-transform: none` so the authored Russian casing is preserved;
+- sections get `box-sizing: border-box; max-height: 100%; overflow: hidden`.
+
+Fixes (`app/src/css/components.css` / `app/index.html`):
+- the bulb stage got `min-width: 240px`, a smaller nowrap `rgb(...)` readout,
+  and the slide-1 bulb column no longer forces a 160px box (which was wrapping
+  `<div data-bulb-s1 style="width: 160px">`);
+- inline sizes on slides 6 and 9 reduced (`1.8em → 1.4em`, `1.5em → 1.25em`);
+- fixed `rgba(59, 123, 271, …)` → `rgba(59, 123, 255, …)` (invalid alpha channel).
+
+### 15.3 Cup dragging was not smooth (T13)
+The cups only reacted to a click (jump to the clicked level); dragging did not
+produce a gradual change because the move handlers lived on `window` after
+`setPointerCapture` and Reveal.js could claim the gesture.
+
+Fix (`app/src/js/cup.js`):
+- listeners are attached to the cup in the **capture phase** and call
+  `preventDefault()`/`stopPropagation()` so Reveal.js never sees the gesture;
+- dragging is now **relative**: the value changes by
+  `(startY - clientY) / trackHeight * 255`, so the level tracks the pointer and
+  never jumps; a tap shorter than 4px still sets the absolute clicked level;
+- the mapping is extracted to the pure, unit-tested helper
+  `dragValue(startValue, startY, currentY, trackHeight)` in `app/src/js/util.js`.
+
+The protocol-aware hash helper is likewise extracted to `shouldUseHash(protocol)`
+and covered by tests (closing the optional item from §8.3).
+
+### 15.4 Challenge slide had no cups (T14)
+`main.js` inserted the challenge cups **before** calling `createChallenge()`, but
+`createChallenge()` replaces the mount point's `innerHTML`, deleting the cups.
+
+Fix:
+- `challenges.js` now renders a `.challenge-row` with a `.challenge-cups` slot
+  next to the target preview;
+- `main.js` calls `createChallenge()` first, then mounts the three cups into
+  `.challenge-cups` and registers them for cleanup;
+- `components.css` lays the row out horizontally so the slide still fits.
+
+### 15.5 Verification performed
+- `npm test` → **11 passed**.
+- `npm run package` → `✓ web/index.html is self-contained (~1.4 MB)`.
+- Headless Firefox screenshots at 1280×800 for slides 0–10 confirmed every slide
+  fits, fonts render in Comfortaa/Nunito, and the challenge cups are present.
+- `npm run build` still emits the multi-file `dist/`; `npm run dev` still serves
+  from `app/`.
+- `git status` shows no tracked `web/` or `dist/` output.

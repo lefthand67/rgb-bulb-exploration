@@ -18,23 +18,28 @@ export function createChallenge({ mountEl, store }) {
       <div class="challenge-header">
         <h3 class="challenge-title">Цель: повтори цвет «${TARGETS[0].name}»</h3>
       </div>
-      <div class="target-preview">
-        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-          <span style="font-size:0.9em; font-weight:700;">Образец</span>
-          <div class="swatch-target"></div>
-        </div>
-        <div style="font-size:2em;">➔</div>
-        <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-          <span style="font-size:0.9em; font-weight:700;">Твой свет</span>
-          <div class="swatch-current"></div>
+      <div class="challenge-row">
+        <div class="challenge-cups cups-group"></div>
+        <div class="challenge-side">
+          <div class="target-preview">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:0.9em; font-weight:700;">Образец</span>
+              <div class="swatch-target"></div>
+            </div>
+            <div style="font-size:2em;">➔</div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+              <span style="font-size:0.9em; font-weight:700;">Твой свет</span>
+              <div class="swatch-current"></div>
+            </div>
+          </div>
+          <div class="challenge-status" style="font-weight:700; color: var(--accent); min-height: 1.5em;"></div>
+          <div class="challenge-controls">
+            <button class="btn-primary btn-check">Проверить цвет!</button>
+            <button class="preset-chip btn-skip">Пропустить ➔</button>
+          </div>
+          <div class="cup-value-pill">Решено цветов: <span class="solved-badge">0</span> из 16 777 216</div>
         </div>
       </div>
-      <div class="challenge-status" style="font-weight:700; color: var(--accent); min-height: 1.5em;"></div>
-      <div class="challenge-controls">
-        <button class="btn-primary btn-check">Проверить цвет!</button>
-        <button class="preset-chip btn-skip">Пропустить ➔</button>
-      </div>
-      <div class="cup-value-pill">Решено цветов: <span class="solved-badge">0</span> из 16 777 216</div>
     </div>
   `;
 

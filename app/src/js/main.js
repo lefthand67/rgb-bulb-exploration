@@ -1,5 +1,12 @@
 import Reveal from 'reveal.js';
+import 'reveal.js/reveal.css';
+import 'reveal.js/theme/black.css';
+import '../css/theme.css';
+import '../css/components.css';
+
 import { createColorStore } from './state.js';
+import { shouldUseHash } from './util.js';
+
 import { createCup } from './cup.js';
 import { createBulb } from './bulb.js';
 import { createLightMix } from './lightmix.js';
@@ -149,30 +156,31 @@ function initSlide(slide) {
   const challengeEl = slide.querySelector('#challenge-game');
   if (challengeEl) {
     challengeStore = createColorStore({ r: 0, g: 0, b: 0 });
-    // We need the challenge's own cups or a shared set of controls.
-    // The plan suggests the same cups + bulb.
-    // Since the challenge is on a separate slide, we'll inject a set of cups just for the challenge.
-    
-    // Create a layout for the challenge slide that includes cups
-    const gameBox = challengeEl.querySelector('.challenge-box');
-    const cupsDiv = document.createElement('div');
-    cupsDiv.className = 'cups-group';
-    challengeEl.insertBefore(cupsDiv, gameBox);
-    
+    // Build the challenge UI first; it owns the markup of the slide.
+    activeComponents.push(createChallenge({ mountEl: challengeEl, store: challengeStore }));
+
+    // The child mixes light with the same cups as the playground, so mount a
+    // fresh set of cups into the challenge layout after the UI exists.
+    const cupsDiv = challengeEl.querySelector('.challenge-cups');
     ['r', 'g', 'b'].forEach(chan => {
       const cupWrapper = document.createElement('div');
-      createCup({ channel: chan, mountEl: cupWrapper, store: challengeStore });
+      activeComponents.push(createCup({ channel: chan, mountEl: cupWrapper, store: challengeStore }));
       cupsDiv.appendChild(cupWrapper);
     });
-
-    activeComponents.push(createChallenge({ mountEl: challengeEl, store: challengeStore }));
   }
 }
 
+// reveal.js hash:true calls history.replaceState(location.pathname) on the first
+// write, which throws SecurityError when the deck is opened from disk (file://).
+// Keep hash URLs for dev/hosted use, disable them for local files.
+const useHash = shouldUseHash(window.location.protocol);
+
 // Initialize Reveal.js
 Reveal.initialize({
-  hash: true,
+  hash: useHash,
+  history: false,
   slideNumber: 'c/t',
+
   controls: true,
   progress: true,
   transition: 'slide',

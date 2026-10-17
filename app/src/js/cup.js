@@ -1,4 +1,4 @@
-import { clamp } from './util.js';
+import { clamp, dragValue } from './util.js';
 
 export function createCup({ channel, mountEl, store }) {
   const channelNames = { r: 'Красный', g: 'Зелёный', b: 'Синий' };
@@ -50,45 +50,66 @@ export function createCup({ channel, mountEl, store }) {
     updateView(state[channel]);
   });
 
-  // Pointer drag handling
-  let isDragging = false;
-  function handlePointerMove(e) {
-    if (!isDragging) return;
+  // Pointer drag handling.
+  // We use relative dragging (value changes by the distance the pointer moved)
+  // so the level tracks the pointer smoothly instead of jumping to the spot
+  // where the click landed. A short press without movement acts as a tap and
+  // sets the value to the clicked position.
+  let activePointerId = null;
+  let startY = 0;
+  let startValue = 0;
+  let movedDistance = 0;
+
+  function valueFromClientY(clientY) {
     const rect = cupContainer.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const height = rect.height;
-    const ratio = clamp(1 - (y / height), 0, 1);
-    const val = Math.round(ratio * 255);
-    store.set(channel, val);
+    const ratio = clamp(1 - (clientY - rect.top) / rect.height, 0, 1);
+    return Math.round(ratio * 255);
+  }
+
+  function handlePointerDown(e) {
+    if (activePointerId !== null) return;
+    // Stop Reveal.js from hijacking the gesture for slide navigation.
+    e.preventDefault();
+    e.stopPropagation();
+    activePointerId = e.pointerId;
+    startY = e.clientY;
+    startValue = store.get()[channel];
+    movedDistance = 0;
+    cupContainer.focus({ preventScroll: true });
+    try {
+      cupContainer.setPointerCapture(e.pointerId);
+    } catch (_) {}
+  }
+
+  function handlePointerMove(e) {
+    if (e.pointerId !== activePointerId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const dy = startY - e.clientY;
+    movedDistance = Math.max(movedDistance, Math.abs(dy));
+    if (movedDistance < 4) return;
+    const rect = cupContainer.getBoundingClientRect();
+    store.set(channel, dragValue(startValue, startY, e.clientY, rect.height));
   }
 
   function handlePointerUp(e) {
-    if (!isDragging) return;
-    isDragging = false;
+    if (e.pointerId !== activePointerId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    // A tap (no meaningful drag) sets the absolute value at the click point.
+    if (movedDistance < 4) {
+      store.set(channel, valueFromClientY(e.clientY));
+    }
+    activePointerId = null;
     try {
       cupContainer.releasePointerCapture(e.pointerId);
     } catch (_) {}
-    window.removeEventListener('pointermove', handlePointerMove);
-    window.removeEventListener('pointerup', handlePointerUp);
   }
 
-  cupContainer.addEventListener('pointerdown', e => {
-    isDragging = true;
-    cupContainer.setPointerCapture(e.pointerId);
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    handlePointerMove(e);
-    cupContainer.focus();
-  });
-
-  // Tap to jump
-  cupContainer.addEventListener('click', e => {
-    if (e.target === handle) return;
-    const rect = cupContainer.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const ratio = clamp(1 - (y / rect.height), 0, 1);
-    store.set(channel, Math.round(ratio * 255));
-  });
+  cupContainer.addEventListener('pointerdown', handlePointerDown, true);
+  cupContainer.addEventListener('pointermove', handlePointerMove, true);
+  cupContainer.addEventListener('pointerup', handlePointerUp, true);
+  cupContainer.addEventListener('pointercancel', handlePointerUp, true);
 
   // Buttons ±1
   btnMinus.addEventListener('click', () => {
