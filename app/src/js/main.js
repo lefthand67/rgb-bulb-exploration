@@ -2,9 +2,11 @@ import Reveal from 'reveal.js';
 import 'reveal.js/reveal.css';
 import '../css/theme.css';
 import '../css/components.css';
+import '../css/responsive.css';
 
 import { createColorStore } from './state.js';
 import { shouldUseHash } from './util.js';
+import { detectTouch, getLayoutConfig, getLayoutMode, shouldAnimateIntro } from './layout.js';
 
 import { createCup } from './cup.js';
 import { createBulb } from './bulb.js';
@@ -88,15 +90,29 @@ function initSlide(slide) {
   if (introBulbEl) {
     const store = createColorStore({ r: 255, g: 100, b: 0 });
     activeComponents.push(createBulb({ mountEl: introBulbEl, store }));
-    // Add a breathing animation for intro
-    let step = 0;
-    const breathe = () => {
-      step += 0.05;
-      const val = Math.sin(step) * 50 + 200;
-      store.set('r', val);
-      if (slide.contains(introBulbEl)) requestAnimationFrame(breathe);
-    };
-    breathe();
+
+    // Desktop keeps the original "wow": the red channel breathes, so the
+    // glowing bulb and its running RGB/hex numbers change every frame.
+    // Touch devices skip this loop entirely because continuous SVG repainting
+    // can hang Android/Yandex Browser renderers.
+    const reducedMotion = typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (shouldAnimateIntro(isTouch, reducedMotion)) {
+      let animationActive = true;
+      let step = 0;
+      const breathe = () => {
+        if (!animationActive) return;
+        step += 0.05;
+        store.set('r', Math.sin(step) * 50 + 200);
+        requestAnimationFrame(breathe);
+      };
+      activeComponents.push({
+        destroy() {
+          animationActive = false;
+        },
+      });
+      breathe();
+    }
   }
 
   // Slide 1: Bulb
@@ -203,8 +219,23 @@ function initSlide(slide) {
 // Keep hash URLs for dev/hosted use, disable them for local files.
 const useHash = shouldUseHash(window.location.protocol);
 
+// Layout mode is decided from the real viewport before Reveal starts. A narrow
+// desktop window stays on the 1280x720 canvas; only touch portrait screens get
+// the 720x1280 canvas.
+const isTouch = detectTouch();
+let currentMode = getLayoutMode(window.innerWidth, window.innerHeight, isTouch);
+document.documentElement.dataset.layout = currentMode;
+document.documentElement.dataset.touch = String(isTouch);
+const initialLayout = getLayoutConfig(currentMode);
+
 // Initialize Reveal.js
 Reveal.initialize({
+  // Reveal 6 auto-enters scroll view at <=435px, which hides the controls and
+  // breaks horizontal swipe navigation on phones.
+  view: 'slide',
+  scrollActivationWidth: 0,
+  touch: true,
+
   hash: useHash,
   history: false,
   slideNumber: 'c/t',
@@ -213,12 +244,42 @@ Reveal.initialize({
   progress: true,
   transition: 'slide',
   backgroundTransition: 'fade',
-  width: 1280,
-  height: 720,
-  margin: 0.04,
+  width: initialLayout.width,
+  height: initialLayout.height,
+  margin: initialLayout.margin,
   minScale: 0.2,
   maxScale: 1.6,
 });
+
+// Some e2e checks need to select arbitrary slides. Never expose Reveal on the
+// normal production URL.
+if (new URLSearchParams(window.location.search).has('e2e')) {
+  window.__RGB_E2E__ = { Reveal };
+}
+
+// Orientation changes must re-configure Reveal in place, preserving the
+// current slide. Debounce so the browser can settle on the new viewport.
+let resizeTimer = null;
+function handleViewportChange() {
+  if (resizeTimer !== null) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    resizeTimer = null;
+    const nextMode = getLayoutMode(window.innerWidth, window.innerHeight, isTouch);
+    document.documentElement.dataset.layout = nextMode;
+    document.documentElement.dataset.touch = String(isTouch);
+    if (nextMode === currentMode) return;
+    currentMode = nextMode;
+    const layout = getLayoutConfig(nextMode);
+    Reveal.configure({
+      width: layout.width,
+      height: layout.height,
+      margin: layout.margin,
+    });
+    Reveal.layout();
+  }, 150);
+}
+window.addEventListener('resize', handleViewportChange);
+window.addEventListener('orientationchange', handleViewportChange);
 
 // reveal.js centers a section by writing an inline `top` from its scrollHeight.
 // Any DOM mutation after that pass leaves the top stale → the slide is pushed

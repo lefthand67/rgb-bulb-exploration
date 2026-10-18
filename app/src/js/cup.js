@@ -92,6 +92,13 @@ export function createCup({ channel, mountEl, store }) {
     store.set(channel, dragValue(startValue, startY, e.clientY, rect.height));
   }
 
+  function releasePointer(e) {
+    activePointerId = null;
+    try {
+      cupContainer.releasePointerCapture(e.pointerId);
+    } catch (_) {}
+  }
+
   function handlePointerUp(e) {
     if (e.pointerId !== activePointerId) return;
     e.preventDefault();
@@ -100,16 +107,25 @@ export function createCup({ channel, mountEl, store }) {
     if (movedDistance < 4) {
       store.set(channel, valueFromClientY(e.clientY));
     }
-    activePointerId = null;
-    try {
-      cupContainer.releasePointerCapture(e.pointerId);
-    } catch (_) {}
+    releasePointer(e);
+  }
+
+  function handlePointerCancel(e) {
+    if (e.pointerId !== activePointerId) return;
+    // A browser gesture cancelled the pointer. It is not a tap: release the
+    // capture without writing a value.
+    e.preventDefault();
+    e.stopPropagation();
+    releasePointer(e);
   }
 
   cupContainer.addEventListener('pointerdown', handlePointerDown, true);
   cupContainer.addEventListener('pointermove', handlePointerMove, true);
   cupContainer.addEventListener('pointerup', handlePointerUp, true);
-  cupContainer.addEventListener('pointercancel', handlePointerUp, true);
+  cupContainer.addEventListener('pointercancel', handlePointerCancel, true);
+  cupContainer.addEventListener('lostpointercapture', e => {
+    if (e.pointerId === activePointerId) activePointerId = null;
+  });
 
   // Buttons ±1
   btnMinus.addEventListener('click', () => {

@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       : [],
     server: {
       port: 3000,
-      open: true
+      open: !process.env.CI
     },
     build: {
       // outDir is resolved relative to `root` (app/)

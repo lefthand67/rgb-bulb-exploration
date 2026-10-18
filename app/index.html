@@ -2,7 +2,20 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <script>
+    // Set the layout mode before the module bundle paints, so a phone never
+    // flashes the 1280x720 desktop layout first.
+    (function () {
+      var isTouch = navigator.maxTouchPoints > 0 ||
+        (typeof window.matchMedia === 'function' &&
+         window.matchMedia('(pointer: coarse)').matches);
+      var w = window.innerWidth, h = window.innerHeight;
+      document.documentElement.dataset.touch = String(isTouch);
+      document.documentElement.dataset.layout =
+        (isTouch && w <= 900 && h > w) ? 'portrait' : 'landscape';
+    })();
+  </script>
   <meta name="color-scheme" content="dark light">
   <title>RGB Чашки: почему в лампочке 16 миллионов цветов?</title>
   
@@ -26,9 +39,9 @@
       <!-- Slide 1: Meet your bulb -->
       <section>
         <h2>💡 Твоя умная лампочка</h2>
-        <div style="display: flex; gap: 40px; align-items: center; justify-content: center; margin-top: 20px;">
-          <div data-bulb-s1 style="flex: 0 0 auto;"></div>
-          <div style="text-align: left; max-width: 500px;">
+        <div class="bulb-intro-row">
+          <div data-bulb-s1 class="bulb-intro-bulb"></div>
+          <div class="bulb-intro-copy">
             <p class="fragment">Эта лампочка говорит, что умеет светить <strong>16 миллионов</strong> цветов.</p>
             <p class="fragment" style="color: var(--accent);">«Если смотреть на новый цвет каждую секунду, днём и ночью без сна, понадобится примерно <strong>194 дня</strong>!»</p>
           </div>
@@ -103,7 +116,7 @@
           <div class="stage-group-wrap">
             <div id="bulb-playground"></div>
             <p class="bulb-caption">Чем больше света в чашках, тем ярче светит лампочка.</p>
-            <div class="chips-group" style="margin-top: 8px;">
+            <div class="chips-group">
               <button class="preset-chip" data-preset="255,220,0">☀️ Солнце</button>
               <button class="preset-chip" data-preset="0,120,255">🌊 Океан</button>
               <button class="preset-chip" data-preset="40,200,60">🌱 Трава</button>
@@ -142,12 +155,12 @@
       </section>
 
       <!-- Slide 6: Three cups (16,777,216) -->
-      <section>
+      <section class="cube-slide">
         <h2>🧊 Три чашки: от квадрата к кубу</h2>
         <div id="cube-slide6"></div>
         <p class="fragment">Квадрат с прошлого слайда (65 536 цветов) — это <strong>один лист</strong>.</p>
         <p class="fragment">У синего тоже <strong>256 шагов</strong> — значит, листов <strong>256</strong>. Получается куб!</p>
-        <div style="font-size: 1.15em; font-family: var(--font-heading); font-weight: 700; color: var(--accent); margin: 6px 0;">
+        <div class="formula-line">
           256 × 256 × 256 = <span id="counter-16m">0</span>
         </div>
         <p class="fragment"><strong>Вот отсюда 16 777 216! Это умножение.</strong></p>
@@ -204,7 +217,7 @@
       </section>
 
       <!-- Slide 8: Challenge game -->
-      <section>
+      <section class="challenge-slide">
         <h2>🎯 Найди такой цвет</h2>
         <p>Попробуй повторить заданный цвет с помощью наших чашек!</p>
         <div id="challenge-game"></div>
@@ -216,7 +229,7 @@
       <!-- Slide 9: Recap -->
       <section>
         <h2>🌟 Что мы узнали?</h2>
-        <div style="display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; text-align: left;">
+        <div class="recap-list">
           <p class="fragment">1️⃣ В каждой чашке <strong>256</strong> шагов (и 0 тоже считается!).</p>
           <p class="fragment">2️⃣ Три чашки перемножаются: <strong>256 × 256 × 256</strong>.</p>
           <p class="fragment">3️⃣ Получается ровно <strong>16 777 216</strong> цветов — примерно 16,7 миллиона!</p>
@@ -232,7 +245,7 @@
       <!-- Slide 10: Grown-up slide -->
       <section data-visibility="uncounted">
         <h2>👨‍👩‍👦 Для взрослых (родителям)</h2>
-        <div style="text-align: left; max-width: 850px; margin: 0 auto; font-size: 0.9em;">
+        <div class="grownup-copy">
           <p>• <strong>24-битный цвет:</strong> по <strong>8 бит</strong> на канал (<code>2⁸ = 256</code>). Три канала (RGB) — 24 бита — <strong>16 777 216</strong> цветов.</p>
           <p>• <strong>Hex-формат:</strong> <code>#RRGGBB</code>, каждая пара — число от <code>00</code> до <code>FF</code> (0–255).</p>
           <p>• <strong>Аддитивная модель:</strong> красный + зелёный + синий = белый свет (в отличие от субтрактивной модели красок CMYK, где смешение темнеет).</p>

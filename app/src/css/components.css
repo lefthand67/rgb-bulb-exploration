@@ -22,7 +22,6 @@
   align-items: center;
   gap: 12px;
   user-select: none;
-  touch-action: none;
 }
 
 .cup-label {
@@ -45,6 +44,7 @@
   overflow: hidden;
   cursor: pointer;
   box-shadow: inset 0 0 15px rgba(10, 15, 25, 0.35);
+  touch-action: none; /* only the draggable cup surface */
 }
 
 .cup-container:focus-visible {
@@ -100,6 +100,8 @@
 }
 
 .cup-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: var(--panel-bg);
   color: var(--text-main);
   border: 2px solid var(--panel-border);
@@ -193,6 +195,8 @@
 }
 
 .preset-chip {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: var(--surface);
   border: 1px solid var(--panel-border);
   color: var(--text-main);
@@ -658,6 +662,8 @@ svg[data-bulb-state="off"] .bulb-body {
 }
 
 .btn-primary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: var(--red);
   color: #ffffff; /* on the red button, both themes */
   border: none;
@@ -701,16 +707,6 @@ svg[data-bulb-state="off"] .bulb-body {
   50% { transform: translateX(-50%) scale(1.03); }
 }
 
-@media (max-width: 900px) {
-  .lab-container {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .challenge-row {
-    gap: 16px;
-  }
-}
 
 /* On/off switch slide (0 ↔ 255) */
 .slide-switch, .switch-slide .switch-stage {
@@ -764,6 +760,8 @@ svg[data-bulb-state="off"] .bulb-body {
 }
 
 .light-switch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   position: relative;
   width: 150px;
   min-height: 56px;
@@ -899,17 +897,6 @@ svg[data-bulb-state="off"] .bulb-body {
   }
 }
 
-@media (max-width: 900px) {
-  .switch-slide .switch-stage {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .switch-slide .switch-controls {
-    min-width: 0;
-    width: 100%;
-  }
-}
 
 .bulb-caption {
   display: block;
@@ -919,3 +906,51 @@ svg[data-bulb-state="off"] .bulb-body {
   color: var(--text-muted);
   margin: 6px auto 0;
 }
+
+/* The cube slide is the tallest desktop slide: compact its paragraph rhythm
+   so the final fragment stays inside the 720px canvas. */
+.cube-slide p {
+  margin: 18px 0;
+}
+
+/* Layout-only classes (moved out of app/index.html so portrait CSS can
+   override them without fighting inline styles). */
+.bulb-intro-row {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.bulb-intro-bulb { flex: 0 0 auto; }
+
+.bulb-intro-copy {
+  text-align: left;
+  max-width: 500px;
+}
+
+.recap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.formula-line {
+  font-size: 1.15em;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--accent);
+  margin: 6px 0;
+}
+
+.grownup-copy {
+  text-align: left;
+  max-width: 850px;
+  margin: 0 auto;
+  font-size: 0.9em;
+}
+

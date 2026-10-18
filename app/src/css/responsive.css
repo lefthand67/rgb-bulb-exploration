@@ -1,0 +1,468 @@
+/* Responsive layout modes for touch phones/tablets. Desktop selectors and the
+   desktop visual design remain untouched. All sizes are virtual CSS px on the
+   active Reveal canvas (portrait 720x1280, landscape 1280x720). */
+
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+.cup-btn,
+.preset-chip,
+.light-switch,
+.btn-primary,
+.challenge-controls button,
+.challenge-controls .preset-chip,
+input[type="range"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input[type="range"] {
+  accent-color: var(--blue);
+}
+
+/* The keyboard focus hint is useless (and covers UI) on a touch device. */
+html[data-touch="true"] .focus-hint-banner {
+  display: none !important;
+}
+
+/* Android / Yandex Browser GPU safety: animated or transformed SVG blur
+   filters can hang the renderer on some mobile GPUs. Keep the radial-gradient
+   glow, but drop the Gaussian-blur filter and continuous title animation on
+   touch devices. Desktop keeps the full visual treatment. */
+html[data-touch="true"] .bulb-emissive path {
+  filter: none !important;
+}
+
+
+/* ---------------------------------------------------------------- portrait */
+html[data-layout="portrait"] .reveal {
+  font-size: 34px;
+}
+
+html[data-layout="portrait"] .reveal .slides section {
+  padding: 24px 20px;
+}
+
+html[data-layout="portrait"] .reveal h2 {
+  font-size: 1.35em;
+  margin-bottom: 0.35em;
+}
+
+html[data-layout="portrait"] .reveal p,
+html[data-layout="portrait"] .reveal li {
+  font-size: 1.05em;
+  line-height: 1.4;
+}
+
+html[data-layout="portrait"] .reveal p {
+  margin: 0.35em 0;
+}
+
+/* Row-to-column reflows */
+html[data-layout="portrait"] .bulb-intro-row,
+html[data-layout="portrait"] .lab-container,
+html[data-layout="portrait"] .challenge-row {
+  flex-direction: column;
+  gap: 18px;
+  flex-wrap: nowrap;
+}
+
+html[data-layout="portrait"] .bulb-intro-copy {
+  max-width: 100%;
+  text-align: center;
+}
+
+html[data-layout="portrait"] .bulb-intro-row {
+  margin-top: 12px;
+}
+
+html[data-layout="portrait"] .switch-slide .switch-stage {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+html[data-layout="portrait"] .switch-slide .switch-controls {
+  min-width: 0;
+  width: 100%;
+  gap: 12px;
+}
+
+html[data-layout="portrait"] .switch-slide .switch-bulb {
+  justify-self: center;
+}
+
+html[data-layout="portrait"] .switch-slide .switch-hint {
+  margin-top: 10px;
+  font-size: 0.8em;
+}
+
+html[data-layout="portrait"] .switch-slide .switch-bulb .bulb-container {
+  width: 220px;
+  height: 190px;
+}
+
+html[data-layout="portrait"] .steps-scale {
+  max-width: 100%;
+}
+
+html[data-layout="portrait"] .steps-pill {
+  font-size: 0.85em;
+}
+
+/* Cups and touch-sized controls. At 360px wide the 720px canvas scales to
+   0.5, so an 88px virtual target is ~44 physical px. */
+html[data-layout="portrait"] .cup-container {
+  width: 96px;
+  height: 220px;
+}
+
+html[data-layout="portrait"] .cup-btn {
+  width: 96px;
+  height: 96px;
+  font-size: 1.25em;
+}
+
+html[data-layout="portrait"] .cup-label {
+  font-size: 1em;
+}
+
+html[data-layout="portrait"] .cup-value-pill {
+  font-size: 0.82em;
+}
+
+html[data-layout="portrait"] .challenge-cups .cup-wrapper {
+  width: auto;
+}
+
+html[data-layout="portrait"] .challenge-cups .cup-container {
+  width: 96px;
+  height: 220px;
+}
+
+html[data-layout="portrait"] .challenge-cups .cup-btn {
+  width: 96px;
+  height: 96px;
+}
+
+html[data-layout="portrait"] .challenge-cups .cup-label,
+html[data-layout="portrait"] .challenge-cups .cup-value-pill {
+  font-size: 0.7em;
+}
+
+html[data-layout="portrait"] .challenge-side {
+  flex-basis: auto;
+  width: 100%;
+}
+
+html[data-layout="portrait"] .challenge-box {
+  width: 100%;
+  padding: 16px;
+  gap: 10px;
+}
+
+html[data-layout="portrait"] .target-preview {
+  gap: 10px;
+}
+
+html[data-layout="portrait"] .target-preview > div {
+  min-width: 82px;
+}
+
+html[data-layout="portrait"] .preset-chip,
+html[data-layout="portrait"] .light-switch,
+html[data-layout="portrait"] .btn-primary,
+html[data-layout="portrait"] .challenge-controls button {
+  min-height: 96px;
+  padding: 12px 20px;
+  font-size: 0.9em;
+}
+
+html[data-layout="portrait"] .chips-group {
+  max-width: 100%;
+  gap: 10px;
+}
+
+html[data-layout="portrait"] .light-switch {
+  width: 220px;
+  min-height: 96px;
+  border-radius: 48px;
+  font-size: 1em;
+}
+
+html[data-layout="portrait"] .light-switch__knob {
+  width: 60px;
+  height: 60px;
+  margin-top: -30px;
+  left: 10px;
+}
+
+html[data-layout="portrait"] .light-switch.is-on .light-switch__knob {
+  transform: translateX(132px);
+}
+
+html[data-layout="portrait"] .light-switch__label {
+  padding-left: 62px;
+}
+
+html[data-layout="portrait"] .light-switch.is-on .light-switch__label {
+  padding-left: 0;
+  padding-right: 62px;
+}
+
+html[data-layout="portrait"] .lightmix-container {
+  width: 420px;
+  height: 340px;
+}
+
+html[data-layout="portrait"] .lightmix-circle {
+  width: 200px;
+  height: 200px;
+}
+
+html[data-layout="portrait"] .lightmix-circle.red {
+  top: 20px;
+  left: 110px;
+}
+
+html[data-layout="portrait"] .lightmix-circle.green {
+  bottom: 20px;
+  left: 20px;
+}
+
+html[data-layout="portrait"] .lightmix-circle.blue {
+  bottom: 20px;
+  right: 20px;
+}
+
+html[data-layout="portrait"] .myth-panel--lightmix {
+  width: 420px;
+}
+
+html[data-layout="portrait"] .myth-illustration {
+  min-height: 0;
+  margin: 6px auto;
+  gap: 12px;
+}
+
+html[data-layout="portrait"] .myth-panel {
+  width: 220px;
+}
+
+html[data-layout="portrait"] .myth-swatch {
+  width: 68px;
+  height: 68px;
+}
+
+html[data-layout="portrait"] .myth-swatch--white {
+  width: 86px;
+  height: 86px;
+}
+
+html[data-layout="portrait"] .myth-paint {
+  width: 160px;
+  height: 104px;
+}
+
+html[data-layout="portrait"] .myth-blob {
+  width: 78px;
+  height: 62px;
+}
+
+html[data-layout="portrait"] .myth-blob--b {
+  left: 41px;
+}
+
+html[data-layout="portrait"] .swatch-target,
+html[data-layout="portrait"] .swatch-current {
+  width: 96px;
+  height: 96px;
+}
+
+html[data-layout="portrait"] .bulb-container {
+  width: 220px;
+  height: 220px;
+}
+
+html[data-layout="portrait"] .stage-group {
+  min-width: 0;
+  padding: 16px;
+  gap: 8px;
+}
+
+html[data-layout="portrait"] .bulb-caption {
+  max-width: 100%;
+  font-size: 0.72em;
+}
+
+html[data-layout="portrait"] .pixel-strip,
+html[data-layout="portrait"] .strip-ends {
+  max-width: 100%;
+}
+
+html[data-layout="portrait"] .strip-container {
+  margin: 12px 0;
+}
+
+html[data-layout="portrait"] .grid2d-canvas-wrap {
+  width: 380px;
+  height: 380px;
+}
+
+html[data-layout="portrait"] .grid2d-axis-x {
+  width: 380px;
+}
+
+html[data-layout="portrait"] .grid2d-legend {
+  max-width: 680px;
+  gap: 6px;
+}
+
+html[data-layout="portrait"] .legend-chip {
+  font-size: 0.62em;
+}
+
+html[data-layout="portrait"] .grid2d-numbers {
+  font-size: 0.72em;
+}
+
+html[data-layout="portrait"] .grid2d-wrapper {
+  gap: 4px;
+}
+
+html[data-layout="portrait"] .grid2d-preview {
+  gap: 8px;
+}
+
+html[data-layout="portrait"] .grid2d-swatch {
+  width: 52px;
+  height: 52px;
+}
+
+html[data-layout="portrait"] .cube-iso {
+  width: 600px;
+  max-width: 100%;
+}
+
+html[data-layout="portrait"] .cube-iso__caption {
+  font-size: 0.62em;
+}
+
+html[data-layout="portrait"] .cube-iso__slider-row {
+  font-size: 0.78em;
+  gap: 8px;
+  min-height: 96px;
+}
+
+html[data-layout="portrait"] .cube-iso__slider-row input[type="range"] {
+  width: 360px;
+  min-height: 96px;
+}
+
+html[data-layout="portrait"] .cube-iso__slider-row label {
+  white-space: nowrap;
+}
+
+html[data-layout="portrait"] .recap-list {
+  max-width: 100%;
+  gap: 10px;
+}
+
+html[data-layout="portrait"] .grownup-copy {
+  max-width: 100%;
+  font-size: 0.78em;
+}
+
+html[data-layout="portrait"] .grownup-copy p {
+  margin: 0.35em 0;
+  line-height: 1.35;
+}
+
+/* ------------------------------------------------- phone landscape (touch) */
+@media (max-width: 1000px) {
+  html[data-touch="true"][data-layout="landscape"] .cup-container {
+    width: 96px;
+    height: 200px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .cup-btn {
+    width: 96px;
+    height: 96px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .challenge-cups .cup-wrapper {
+    width: auto;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .challenge-cups .cup-container {
+    width: 96px;
+    height: 180px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .challenge-cups .cup-btn {
+    width: 96px;
+    height: 96px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .preset-chip,
+  html[data-touch="true"][data-layout="landscape"] .light-switch,
+  html[data-touch="true"][data-layout="landscape"] .btn-primary,
+  html[data-touch="true"][data-layout="landscape"] .challenge-controls button {
+    min-height: 96px;
+    padding: 10px 18px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .swatch-target,
+  html[data-touch="true"][data-layout="landscape"] .swatch-current {
+    width: 96px;
+    height: 96px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .cube-iso__slider-row input[type="range"] {
+    min-height: 96px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .chips-group {
+    max-width: 460px;
+  }
+
+  /* Keep five preset chips on two rows so the playground fits 720px. */
+  html[data-touch="true"][data-layout="landscape"] .preset-chip {
+    font-size: 0.78em;
+    padding: 8px 10px;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .lab-container {
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  /* Shrink the bulb stage slightly so the playground stays inside 720px. */
+  html[data-touch="true"][data-layout="landscape"] .playground .bulb-container {
+    width: 120px;
+    height: 140px;
+  }
+
+  /* Enlarged challenge cups and buttons need the full 1280px canvas width. */
+  html[data-touch="true"][data-layout="landscape"] .challenge-box {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Keep the cube slide's explanatory paragraphs compact on short phones. */
+  html[data-touch="true"][data-layout="landscape"] .cube-slide p {
+    margin: 8px 0;
+    font-size: 1em;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .cube-slide h2 {
+    margin-bottom: 0.25em;
+  }
+
+  html[data-touch="true"][data-layout="landscape"] .challenge-slide p {
+    margin: 10px 0;
+  }
+}

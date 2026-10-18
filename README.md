@@ -25,88 +25,103 @@
   Пока чашка в фокусе, стрелки управляют ею (появится подсказка внизу). Нажмите `Esc`, чтобы вернуть стрелки слайдам.
 * **Игра «Найди такой цвет»:** подберите цвет как на образце и нажмите «Проверить цвет!». Если трудно — «Пропустить ➔».
 * `O` — обзор всех слайдов.
+* **На телефоне (Android):** в портретном режиме слайды перестраиваются в одну колонку — текст и кнопки крупные, чашки удобно тянуть пальцем, слайды листаются свайпом. В горизонтальном режиме сохраняется обычный вид презентации.
 
 **Рекомендуемые браузеры:** Chrome, Edge, Firefox последних версий.
 
 ---
 
-#### Part B — How to install, run, and compile the web form (for anyone with the repo)
+#### Part B — Development, tests, and the single-file build (Podman only)
+
+Everything runs inside the project's Podman container. Do **not** install Node,
+npm, Chromium, ChromeDriver, Python, or Selenium on the host.
 
 **Prerequisites**
-- [Node.js](https://nodejs.org/) **18 or newer** (LTS 20/22 recommended) and npm (it comes with Node).
-- Check your install:
-  ```bash
-  node -v   # should print v18.x or newer
-  npm -v    # should print 9.x or newer
-  ```
-  If Node is missing: install the LTS version from nodejs.org (Windows/macOS installer), `brew install node` (macOS), or your package manager / `nvm` (Linux).
+- Podman (rootless is fine) and a checkout of this repository.
+- Optionally `git` for cloning.
 
-**Step 1 — get the project**
-Clone the repo (or copy the folder) and open a terminal **in the project root** — the folder that contains `package.json` and `vite.config.js`:
+**Step 1 — build the container image (once)**
 ```bash
-git clone <repo-url> rgb-bulb
-cd rgb-bulb
+podman build -f containers/Containerfile -t rgb-bulb-dev .
 ```
+The wrappers below build the image automatically if it is missing.
 
-**Step 2 — install dependencies (once)**
+**Step 2 — install dependencies inside the container**
 ```bash
-npm install
+./containers/run.sh bash -lc 'npm ci'
 ```
+`node_modules` lives in a named Podman volume, not on the host.
 
 **Step 3 — run the app in development mode**
 ```bash
-npm run dev
+./containers/dev.sh
 ```
-Vite prints a URL (usually `http://localhost:3000`) and opens it in your browser. Edit files under `app/` — the page reloads automatically. Stop with `Ctrl+C`. (In dev mode the URL hash tracks the current slide.)
+Open `http://localhost:3000`. Edit files under `app/` — Vite reloads the page.
+Stop with `Ctrl+C`. In dev mode the URL hash tracks the current slide.
 
-**Step 4 — compile the single-file web form (the teacher deliverable)**
+**Step 4 — compile the single-file teacher deliverable**
 ```bash
-npm run package
+./containers/run.sh bash -lc 'npm run package'
 ```
 This runs `build:web` and then `verify:web`.
-- Output: **`web/index.html`** — one self-contained file (JS, CSS and fonts are inlined).
-- Open it by double-clicking, or serve it locally if you prefer: `npx serve web`.
-- `web/` is generated and **not committed** to git; run this command whenever you want a fresh copy.
+- Output: **`web/index.html`** — one self-contained file (JS, CSS, and fonts inlined).
+- `web/` is generated and **not committed**; run this command for a fresh copy.
+- The same file works from `file://`, offline, and when sent via a messenger.
 
-**Step 5 — (optional) build the multi-file version for web hosting**
+**Step 5 — run the full check suite (required before claiming completion)**
 ```bash
-npm run build     # -> dist/
-npm run preview   # serve dist/ locally to check
+./containers/run.sh bash containers/test.sh
+```
+The script runs:
+- `npm ci` (always, so a stale named volume cannot hide dependency changes);
+- `npm test` — Vitest unit tests, including layout-mode helpers;
+- `npm run package` + `npm run verify:web`;
+- `tests/e2e/android_webdriver.py` — portrait/landscape/desktop matrix, real
+  touch gestures, per-slide clipping, touch targets, orientation changes;
+- `tests/e2e/visual_contracts.py` — additive light stage, bulb states, cube
+  collapse, challenge data;
+- `tests/e2e/centering.py` — per-layout vertical centering.
+
+Screenshots are written to `tests/e2e/artifacts/` (gitignored).
+
+**Step 6 — optional multi-file build for web hosting**
+```bash
+./containers/run.sh bash -lc 'npm run build'   # -> dist/
+./containers/run.sh bash -lc 'npm run preview'
 ```
 
-**Step 6 — run the tests**
-```bash
-npm test
-```
-
-**Step 7 — (optional) visual regression checks**
-
-The browser checks need the dev server plus a headless Firefox with the
-WebDriver BiDi port open:
-```bash
-npm run dev
-firefox --headless --remote-debugging-port 9222 about:blank
-npm run check:visuals                                  # dark light-mix stage, bulb states, cube collapse, challenge data
-node scripts/check-centering.mjs http://localhost:3000 # every slide/sub-slide is vertically centred
-```
+**Responsive layout**
+- Desktop and phone landscape keep the **1280 × 720** Reveal canvas and the
+  original visual design.
+- Touch portrait phones/small tablets (`width <= 900`, taller than wide) use a
+  **720 × 1280** canvas with `html[data-layout="portrait"]` and a dedicated
+  responsive stylesheet (`app/src/css/responsive.css`).
+- Reveal is pinned to slide mode with `scrollActivationWidth: 0`; otherwise
+  Reveal 6 silently enters scroll view at ≤435 px and hides the controls.
+- Android baseline: **Android 10+ / Chromium 84+**. Avoid `dvh`, `:has()`,
+  container queries, and `aspect-ratio`.
+- The manual smoke test is the operator's **Samsung A65** in portrait and
+  landscape; record the exact model, Android version, and Chrome/WebView version.
 
 **Project structure**
 ```
-app/     ← source of the presentation. Edit here (and only here).
-web/     ← generated single file for teachers. Do NOT edit by hand.
-dist/    ← generated multi-file build for hosting. Do NOT edit by hand.
-docs/    plans and instructions
-scripts/ build helpers (verify-web.mjs, …)
-tests/   Vitest unit tests
+app/         ← source of the presentation. Edit here (and only here).
+containers/  ← Containerfile and Podman wrappers (run/dev/test).
+web/         ← generated single file for teachers. Do NOT edit by hand.
+dist/        ← generated multi-file build for hosting. Do NOT edit by hand.
+docs/        ← plans and instructions.
+scripts/     ← build helpers (verify-web.mjs).
+tests/unit/  ← Vitest unit tests.
+tests/e2e/   ← Selenium/Chromium touch, layout, visual, and centering checks.
 ```
 
 **Troubleshooting**
 | Problem | Fix |
 |---|---|
-| `npm: command not found` / `node: command not found` | Node.js is not installed — install the LTS version, reopen the terminal. |
-| `npm run dev` fails on port 3000 | Vite tries another port automatically; read the printed URL. To pin a port, edit `server.port` in `vite.config.js`. |
-| `web/index.html` does not exist | Run `npm run package` first; the `web/` folder is only created by the build. |
+| `podman: command not found` | Install Podman on the host; no Node/Chromium install is needed. |
+| The container image is stale | Rebuild: `podman build -f containers/Containerfile -t rgb-bulb-dev .` |
+| `web/index.html` does not exist | Run `./containers/run.sh bash -lc 'npm run package'`. |
 | Double-clicking `web/index.html` opens an editor | Right-click → "Open with" → choose a browser. |
-| Russian text looks like an ordinary system font | Run `npm run verify:web`; it must report an inlined `data:font`. If not, open an issue / rebuild. |
-| The page looks broken after editing | Run `npm install` again, then `npm run package`; delete `web/` and rebuild. |
-| Want a clean rebuild | Delete `node_modules/`, `web/` and `dist/`, then `npm install && npm run package`. |
+| Russian text looks like an ordinary system font | Run `npm run verify:web`; it must report an inlined `data:font`. |
+| `npm ci` fails after changing `package-lock.json` | Re-run the full container test script; it always reinstalls dependencies. |
+| Want a clean rebuild | Remove `web/` and `dist/`, then re-run `npm run package` inside the container. |

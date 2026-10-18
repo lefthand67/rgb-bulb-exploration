@@ -60,7 +60,7 @@ The responsive/android plan introduces:
 
 Source of truth:
 
-> `docs/plan/20261018_050252_android-mobile-rendering-and-containerized-testing.md`
+> `docs/plan/implemented/20261018_050252_android-mobile-rendering-and-containerized-testing.md`
 
 **Creating that harness is the first step of any task that needs tests.** Do not fall back to host `npm`, `npx`, `node`, `python3`, Chrome, or Firefox. If the harness is missing and the task does not yet include it, stop and add the harness first.
 
@@ -169,11 +169,17 @@ Required assertions:
 - Normal load without `?e2e=1` works and does not expose the test hook.
 - The single file loads from `file://` offline.
 
-### Legacy visual scripts
+### Visual and centering contracts
 
-`scripts/check-visuals.mjs` and `scripts/check-centering.mjs` currently require a host Firefox BiDi session. They are **legacy** and must not be listed as required container checks until they are ported.
+The old host-Firefox BiDi scripts were retired. Their contracts now live in the
+container e2e suite:
 
-The responsive plan ports their contracts into `tests/e2e/` (visual contracts and per-layout centering). Until that port exists, do not run them on the host as a substitute for the container e2e suite.
+- `tests/e2e/visual_contracts.py` — additive light stage, bulb states, cube
+  collapse, challenge data.
+- `tests/e2e/centering.py` — per-layout vertical centering.
+
+Do not add host-Firefox checks or run them on the host as a substitute for the
+container suite.
 
 ### Definition of Done
 
@@ -204,7 +210,7 @@ A task is done only when all are true:
 - The plan must state: summary, evidence, root causes, design, TDD order, acceptance criteria, risks, and files expected to change.
 - Use the existing plans as templates:
   - `docs/plan/implemented/20261018_040921_4c5c12fa_rgb-concept-bulb-off-cube-collapse-challenge-colors.md`
-  - `docs/plan/20261018_050252_android-mobile-rendering-and-containerized-testing.md`
+  - `docs/plan/implemented/20261018_050252_android-mobile-rendering-and-containerized-testing.md`
 - When implemented and verified, move the plan to `docs/plan/implemented/`.
 - Keep the plan current if the design changes during implementation.
 

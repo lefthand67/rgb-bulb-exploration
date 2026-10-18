@@ -2,7 +2,7 @@
 
 - **ID / filename:** `20261018_050252_android-mobile-rendering-and-containerized-testing.md`
 - **Date:** 2026-10-18
-- **Status:** Proposed
+- **Status:** Implemented and verified (2026-10-18)
 - **Depends on / cross-references:**
   - `docs/plan/implemented/20261018_023540_084f6a85_standalone-offline-single-file-presentation.md` — `web/index.html` must stay a single self-contained file that can be sent via messengers and opened offline.
   - `docs/plan/implemented/20261018_030423_573e1977_deck-polish-system-theme-bulb-brightness-slides.md` — system theme, the desktop 1280 × 720 Reveal canvas, and the current `@media (max-width: 900px)` layout rules.
@@ -876,3 +876,53 @@ Rollback:
 | `AGENTS.md` | Update container commands, responsive layout rules, TDD checks, Android baseline. |
 | `README.md` | Podman workflow; mobile layout note; remove host install instructions for this workflow. |
 | `docs/plan/implemented/...` | Move this plan here after implementation. |
+
+
+---
+
+## 10. Implementation result (2026-10-18)
+
+Implemented in this order:
+
+- Added the Podman harness (`containers/Containerfile`, `run.sh`, `dev.sh`,
+  `test.sh`), with `npm ci` on every test run and named volumes for
+  `node_modules` and the npm cache.
+- Added `app/src/js/layout.js`, `tests/unit/layout.test.js`, and the early
+  inline `data-layout`/`data-touch` detection in `app/index.html`.
+- Pinned Reveal to `view: 'slide'` with `scrollActivationWidth: 0`, and added
+  debounced `Reveal.configure()` + `Reveal.layout()` on orientation changes.
+- Added `app/src/css/responsive.css` with a 720 × 1280 portrait layout, 96 px
+  virtual touch targets, coarse-pointer landscape overrides, and safe handling
+  of `overscroll-behavior`.
+- Split `pointercancel` from `pointerup` in `cup.js`; cancellation never
+  commits a value. The intro-bulb breathing is now a compositor-only CSS
+  animation scoped to the present slide, and touch devices additionally drop
+  the SVG Gaussian-blur filter and the continuous title animation. This avoids
+  the mobile renderer hangs reported with SVG filters in Android/Yandex
+  Browser while keeping the desktop visual treatment.
+- Ported the legacy Firefox BiDi contracts to Selenium:
+  `tests/e2e/visual_contracts.py` and `tests/e2e/centering.py`; the old scripts
+  were retired.
+- Added the full `tests/e2e/android_webdriver.py` matrix with CDP touch
+  emulation, real gestures, per-slide clipping checks, touch-target checks,
+  orientation changes, and screenshots.
+- Updated `README.md`, `AGENTS.md`, `package.json`, and `.gitignore`.
+
+Verification command:
+
+```bash
+./containers/run.sh bash containers/test.sh
+```
+
+Result: all Vitest tests, packaging/`verify:web`, the 8-profile Android/desktop
+matrix, visual contracts, and per-layout centering pass. Screenshots were
+inspected in `tests/e2e/artifacts/` (gitignored).
+
+Follow-up: `docs/plan/implemented/20261018_160001_restore-desktop-intro-bulb-wow.md`
+restored the desktop title-slide breathing bulb with running RGB numbers while
+keeping the touch-device renderer safeguards.
+
+Manual Samsung A65 smoke test: not performed by the agent in this environment;
+the operator should still run it in portrait and landscape through the
+messenger/file-manager flow and record the exact model, Android version, and
+Chrome/WebView version.
